@@ -37,5 +37,12 @@ Finally, Approach is soon coming in many flavors and with an app builder for non
 
 Feel free to ask for others, but if they aren't in that list you should just get my help while you write the fork! Don't worry, it's easy!
 
+You can follow various forms of shameless self promotion as I start this project at 
+https://twitter.com/ApproachGaret
+
+Seriously, can't believe I would get a Twitter.. oh boy..
+Soon you can also follow opinionated opinions at my blog at the Approach site.
+
+Cheers, -Garet
 
 
