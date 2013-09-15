@@ -131,7 +131,7 @@ APPROACH_HEREDOC_SYNTAX;
 //canvas children, In Garet CSS, sheer just means no padding, no margin, no border.
 //I tend to have containers that way and let inner groups have their way with formating
 //I'm no style guru! YOU HAVE BEEN DISCLAIMERED
-$canvas->classes = 'sheer';
+$canvas->classes[] = 'sheer';
 $canvas->children[] = $heading;
 $canvas->children[] = $page;
 $canvas->children[] = $footer;
