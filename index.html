@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Approach-core : Flow, Compositing, Components, Services, Live CMS and more" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Approach-core</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/stealthpaladin/Approach-Core">View on GitHub</a>
+
+          <h1 id="project_title">Approach-core</h1>
+          <h2 id="project_tagline">Flow, Compositing, Components, Services, Live CMS and more</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/stealthpaladin/Approach-Core/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/stealthpaladin/Approach-Core/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="approach-core" class="anchor" href="#approach-core"><span class="octicon octicon-link"></span></a>Approach-Core</h1>
+
+<p>Flow, Compositing, Components, Services, Live CMS plus more for cloud enabled PHP applications.
+Soon coming to Java/Droid, C++, C# and others.</p>
+
+<p>Approach is a life-oriented, organic architecture for software.</p>
+
+<p>Approach has been made with the helpful review of many passing developers who had worked with me on partnership projects with over 50 different companies and non-profits. Due to constant contributions from FlipSide Technologies, or my personal involvement, some developers freely contributed to a past proprietary version of Approach. </p>
+
+<p>Sincere thanks to all developers who have contributed until now. </p>
+
+<p>Much of Approach has been dissected and systematically deleted to allow re-implementation of features at intuitive levels delivering a new breed of user, developer, computer and organization friendly workflows all at once.</p>
+
+<p>Competing paradigms abound in our industry:</p>
+
+<ul>
+<li>Proceedural (considered oldie but a goodie)</li>
+<li>Object Oriented</li>
+<li>Dataflow Oriented &amp; Flow Driven</li>
+<li>Service Oriented Architecture</li>
+<li>Event Driven / Asynchronous</li>
+<li>Parallell Programming is in and out of all of these</li>
+<li>Recursion Oriented (I'm lookin' at you, LISPs)</li>
+<li>Component Oriented</li>
+<li>More being made all the time</li>
+</ul><p>Approach allows you to write applications using any mixture of these methods you like, or none at all. Well, except for procedural - technically all programs are.</p>
+
+<p>Approach has an architecture that is collapsible, replaceable, reverse-nesting capable, and embedding-capable. </p>
+
+<p>Approach enables, it does not orient. Organic systems only orient locally, and this is at the heart of Approach.</p>
+
+<p>Finally, Approach is soon coming in many flavors and with an app builder for non-programmers. PHP, Java/Droid, C# AND C++, JavaScript</p>
+
+<p>Feel free to ask for others, but if they aren't in that list you should just get my help while you write the fork! Don't worry, it's easy!</p>
+
+<p>You can follow various forms of shameless self promotion as I start this project at 
+<a href="https://twitter.com/ApproachGaret">https://twitter.com/ApproachGaret</a></p>
+
+<p>Seriously, can't believe I would get a Twitter.. oh boy..
+Soon you can also follow opinionated opinions at my blog at the Approach site.</p>
+
+<p>Cheers, -Garet</p>
+
+<pre>
+
+EXAMPLE COMPOSITION BUILDING WITH PLAIN RENDERABLES
+
+<?php $pub=new Composition($options); //this is an array of options
+$pub->init($options); //options are optional. I think there's some issue you want to read the constructor for though
+
+
+/*        Document Header Section        */
+
+$head = new renderable('head');      //
+$head-&gt;content='
+    Approach - An approach to organic, human oriented software
+';
+
+/*
+ * THANK YOU to jQuery, RaphaelJS plus both the Signika and Quattrocento Sans fonts. 
+ * Great work that is helping enable development!
+ *
+ */
+
+
+
+//So I also show that you can add stuff through the pub-&gt;DOM. Instead of DOM it might be called "RenderTree"
+//Here I just made a renderable and manually add it to the pub. You could do other things like
+//$html-&gt;children[]=$head; or $APPROACH_DOM_ROOT-&gt;children[]=$head;
+//Just depends on what you're keeping up with today. =)
+
+$pub-&gt;DOM-&gt;children[] = $head;
+//    Head is ready, 
+
+
+/*        Body Section        */
+
+//Gotta have a body. 
+$body = new renderable('body');
+$body-&gt;attributes['style']='background-color: #fff;';
+$pub-&gt;DOM-&gt;children[]=$body;
+
+//Ok I want a big page thing..
+$canvas = new renderable('ul', 'canvas');
+
+//usually you have one of these
+$heading = new renderable('li', 'Navigation'); 
+
+//and one of these, I bet you're used to them being divs though. You can if you want.
+$page = new renderable('li', 'page');  
+
+//Oh I'm just showing how lazy we can be here, really should have put this in the renderable options O_~!
+$canvas-&gt;attributes['style']='background-color: white; position: absolute; left: 50%; margin-left: -540px; width: 1080px; height: 100%; padding-bottom: 22px;';
+
+$theContent = new renderable('ul', 'theContent'); //(left-facing div, 678px wide)
+$theSidebar = new renderable('ul', 'theSidebar'); //(right-facing div, (300 + 2x10 padding + 2x1 border) = 322px wide)
+
+//page children can be added to variables you made, notice we haven't been using the $pub-&gt;DOM method?
+$page-&gt;children[] = $theContent;
+$page-&gt;children[] = $theSidebar;
+
+
+//footer
+$footer = new renderable('li', 'footer');
+
+//PSCH, I dont need no stinkin' structure. Well fine! Have it your way:
+$footer-&gt;content = '
+    
+    ANY HTML IN HERE, ALAS GITHUB'S MARKDOWN 
+    IS NOT PLAYING NICE WITH EXAMPLE HTML
+';
+
+
+
+//canvas children, In Garet CSS, sheer just means no padding, no margin, no border.
+//I tend to have containers that way and let inner groups have their way with formating
+//I'm no style guru! YOU HAVE BEEN DISCLAIMERED
+$canvas-&gt;classes[] = 'sheer';
+$canvas-&gt;children[] = $heading;
+$canvas-&gt;children[] = $page;
+$canvas-&gt;children[] = $footer;
+
+//Oh, did we forget about the body? Oh well no worries we can add stuff to it whenever.
+$body-&gt;children[] = $canvas;
+
+
+//And now you see may layout.php file. I include this at the top of most scripts and then just add stuff to
+//$TheContent-&gt;children[]= smart or renderable(), bam you've got components.
+
+$pub-&gt;publish();
+//Options to send this to file, echo or just get components loaded.
+//More options on the way for parallel and async stuff
+
+
+
+
+//Did you know if you can understand this and get your database set up (with any database lib you want),
+//Service classes can automatically find most anything in these Compositions individually or in mass, and you
+//Can control how much data is being loaded or not, all sorts of bananas. 
+
+?&gt;
+
+</pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Approach-core maintained by <a href="https://github.com/stealthpaladin">stealthpaladin</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
