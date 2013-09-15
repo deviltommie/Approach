@@ -46,3 +46,117 @@ Soon you can also follow opinionated opinions at my blog at the Approach site.
 Cheers, -Garet
 
 
+
+
+
+<pre>
+
+EXAMPLE COMPOSITION BUILDING WITH PLAIN RENDERABLES
+
+<?php
+
+$pub=new Composition($options); //this is an array of options
+$pub->init($options); //options are optional. I think there's some issue you want to read the constructor for though
+
+
+/*        Document Header Section        */
+
+$head = new renderable('head');      //
+$head->content='
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" >
+    <title>Approach - An approach to organic, human oriented software</title>
+    <link rel="stylesheet" type="text/css" href="YOUR_STYLESHEET_CHANGE_THIS_AHA.css" />
+    <link href="http://fonts.googleapis.com/css?family=Signika:700,600,400,300|Quattrocento+Sans:400,700italic,400italic,700" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="http://static.approachfoundation.org/img/logo.png" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"> </script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/jquery-ui.min.js"> </script>
+    <script type="text/javascript" src="http://static.approachfoundation.org/Scripts/raphael-min.js"></script>
+';
+
+/*
+ * THANK YOU to jQuery, RaphaelJS plus both the Signika and Quattrocento Sans fonts. 
+ * Great work that is helping enable development!
+ *
+ */
+
+
+
+//So I also show that you can add stuff through the pub->DOM. Instead of DOM it might be called "RenderTree"
+//Here I just made a renderable and manually add it to the pub. You could do other things like
+//$html->children[]=$head; or $APPROACH_DOM_ROOT->children[]=$head;
+//Just depends on what you're keeping up with today. =)
+
+$pub->DOM->children[] = $head;
+//    Head is ready, 
+
+
+/*        Body Section        */
+
+//Gotta have a body. 
+$body = new renderable('body');
+$body->attributes['style']='background-color: #fff;';
+$pub->DOM->children[]=$body;
+
+//Ok I want a big page thing..
+$canvas = new renderable('ul', 'canvas');
+
+//usually you have one of these
+$heading = new renderable('li', 'Navigation'); 
+
+//and one of these, I bet you're used to them being divs though. You can if you want.
+$page = new renderable('li', 'page');  
+
+//Oh I'm just showing how lazy we can be here, really should have put this in the renderable options O_~!
+$canvas->attributes['style']='background-color: white; position: absolute; left: 50%; margin-left: -540px; width: 1080px; height: 100%; padding-bottom: 22px;';
+
+$theContent = new renderable('ul', 'theContent'); //(left-facing div, 678px wide)
+$theSidebar = new renderable('ul', 'theSidebar'); //(right-facing div, (300 + 2x10 padding + 2x1 border) = 322px wide)
+
+//page children can be added to variables you made, notice we haven't been using the $pub->DOM method?
+$page->children[] = $theContent;
+$page->children[] = $theSidebar;
+
+
+//footer
+$footer = new renderable('li', 'footer');
+
+//PSCH, I dont need no stinkin' structure. Well fine! Have it your way
+$footer->content = <<<APPROACH_HEREDOC_SYNTAX
+<h2 style="line-height: .8em">Approach is coming soon to a cluster near you.</h2>
+<div class="copyright" style="margin: 2px;">&copy; 2013 Approach Foundation LLC, All Rights Reserved</div>
+APPROACH_HEREDOC_SYNTAX;
+//Of course you can use whatever syntax you want there. =)
+
+
+//canvas children, In Garet CSS, sheer just means no padding, no margin, no border.
+//I tend to have containers that way and let inner groups have their way with formating
+//I'm no style guru! YOU HAVE BEEN DISCLAIMERED
+$canvas->classes = 'sheer';
+$canvas->children[] = $heading;
+$canvas->children[] = $page;
+$canvas->children[] = $footer;
+
+//Oh, did we forget about the body? Oh well no worries we can add stuff to it whenever.
+$body->children[] = $canvas;
+
+
+//And now you see may layout.php file. I include this at the top of most scripts and then just add stuff to
+//$TheContent->children[]= smart or renderable(), bam you've got components.
+
+$pub->publish();
+//Options to send this to file, echo or just get components loaded.
+//More options on the way for parallel and async stuff
+
+
+
+
+//Did you know if you can understand this and get your database set up (with any database lib you want),
+//Service classes can automatically find most anything in these Compositions individually or in mass, and you
+//Can control how much data is being loaded or not, all sorts of bananas. 
+
+?>
+
+</pre>
+
+
+
