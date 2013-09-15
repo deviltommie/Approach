@@ -120,12 +120,12 @@ $page->children[] = $theSidebar;
 //footer
 $footer = new renderable('li', 'footer');
 
-//PSCH, I dont need no stinkin' structure. Well fine! Have it your way (but GitHub forces me to use >>> for display)
-$footer->content = >>>APPROACH_HEREDOC_SYNTAX
+//PSCH, I dont need no stinkin' structure. Well fine! Have it your way:
+$footer->content = '
 <h2 style="line-height: .8em">Approach is coming soon to a cluster near you.</h2>
 <div class="copyright" style="margin: 2px;">&copy; 2013 Approach Foundation LLC, All Rights Reserved</div>
-APPROACH_HEREDOC_SYNTAX;
-//Of course you can use whatever syntax you want there. =)
+';
+
 
 
 //canvas children, In Garet CSS, sheer just means no padding, no margin, no border.
