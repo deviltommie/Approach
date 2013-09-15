@@ -26,7 +26,16 @@ Competing paradigms abound in our industry:
 - More being made all the time
 
 
-Approach allows you to write applications using any mixture of these methods you like, or none at all. Well, except for procedural - technically all programs are.
+Approach allows you to write applications using any mixture of these methods you like, or none at all. Well, except for procedural - technically all programs are. 
+
+A good example: 
+Approach does make use of classes of course. 
+We mix in application produced and managed scopes.
+You -could- very well access these purely from an object oriented methodology. 
+You could have getters and setters for each property of each Component you ever create and use Component to enforce strict types on every type.
+
+It's just that you don't have to. If you don't, Approach has some good and improving tricks that may be hard to notice that make the implicit explicit.
+Who are we to decide which way you code? Sounds like the extension or mod-pack domain to us.
 
 Approach has an architecture that is collapsible, replaceable, reverse-nesting capable, and embedding-capable. 
 
