@@ -43,11 +43,18 @@ Approach enables, it does not orient. Organic systems only orient locally, and t
 
 
 Finally, the many other language flavors coming. This is no joke, Approach is more architecture than code. 
-We've already made at least 50% of Approach independantly in 4 languages over the last decade. Being the only author of renderable and primary designer for the gist of Approach, I ended up being the guy collecting different things, tearing them apart and putting and putting them back together. There's about 20 extension already planned and partly worked up to add different goals.
+We've already made at least 50% of Approach independantly in 4 languages over the last decade. Being the only author of renderable and primary designer for the gist of Approach, I ended up being the one collecting different things, tearing them apart and putting them back together. There's about 20 extension across four languages already planned and partly worked up. Each add different degrees of specialization and/or optimization to Approach.
+
+Similarly we have an architecture for 
+Mod-packs which change the nature of core functionality. 
+Plugins, which are Components that can track design and functionality dependencies very easily and are very easy to make.
+Addons - Similar to normal libraries but on the organic side of your app
+Display Units - Semi-static, Configurable Renderables
+Flow - Elegantly chained, multi-directional user, service, system interactions. Build services, use them with CSS or progressively more custom methods!
+
+There's alot done and alot more to do!
 
 Between here and there, I'm very picky that we need to see what the community wants Approach to be and implement the core in a way that encourages novel features to be developed by multiple projects. We need a simple base to improve software ecosystems.
-
-Feel free to ask for others, but if they aren't in that list you should just get my help while you write the fork! Don't worry, it's easy!
 
 You can follow various forms of shameless self promotion as I start this project at 
 https://twitter.com/ApproachGaret
