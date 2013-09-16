@@ -1,6 +1,6 @@
 ### Just deploy or unpack this repository to any directory, then require_once("ApproachDirectory/Core.php"); and get to work!
 
-Approach-Core
+Approach
 =============
 
 Flow, Compositing, Components, Services, Live CMS plus more for cloud enabled PHP applications.
