@@ -1,3 +1,5 @@
+# Just deploy or unpack this repository to any directory, then require_once("ApproachDirectory/Core.php"); and get to work!
+
 Approach-Core
 =============
 
