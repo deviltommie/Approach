@@ -1,0 +1,95 @@
+NOTICE
+
+The original author acknowledges the common rationale against using Creative Commons, Attribution-SA-NC Licensing.
+The original author acknowledges he is quite stubborn, also acknowledging the rationale behind said behavior below.
+
+========================================================
+
+
+This document hereby grants permission to any work distributed under a license approved by either the 
+Open Source Initiative or Free Software Foundation to use and redistribute all files, and their contents, 
+found in this software distribution, keeping the original terms of this package.
+
+For distributing alongside GPL software:
+Let it also be known this package meets the requirements of "System Library", being relied on to provide
+standard interfaces and services for software built using Approach services and functionality. 
+
+These files include, without exception, the entire directory marked "Core". 
+This directory includes, but is not limited to, the files: 
+
+Component.php, Composition.php, Service.php, and potentially other files.
+
+
+=========================================================
+
+The above is to let you distribute Approach along side GPL software 
+and other open licenses which require permission of the copyright holders.
+
+======================================================
+
+
+If you would like to skip the rationale, don't read the rest. Legal part is over. This is just a notice.
+
+
+
+
+It is noted that both the Free Software Foundation (FSF) and the Open Source Initiative (OSI) do not approve
+of this license being called "Open Source". Approach Foundation has deep resepct for both movement, both
+technically and philosophically. Many of our projects will continually use OSI approved licenses and provide
+real support for non-Approach projects in the Open Source community in the form of much needed coding hours
+and documentation help.
+
+Certainly the licenses certified at both the  OSI and FSF are indeed open source.
+
+Approach in no small part disagrees with the full definition of the "openness" of a source. 
+Neither organization has any actuall authority to define openness. Both are a result of gained momentum.
+
+While agreeing with both organizations that their respective, and partially competing, definitions define
+a *subset* of open source, we will differentiate into what Approach Foundation will refer to as open technology.
+
+From our perspective, the free and open software movement is impeding freedom (as in free speech) to a large degree.
+
+Have you ever noticed that open source licenses have enforced an inability towards dynamic commercialization?
+
+There is not one licensed considered open source which has a strongly defined sense of comercial entities.
+Yet commerce and open source projects drive each other all the time. One day, we are going to integrate.
+
+May as well get started. Approach Foundation is releasing under a CC license because it is the most easily
+comprehended, and we will take a hit on all the smaller instances of "commercial use" that are difficult to 
+define.
+
+Actually, this is to KEEP the heart of our code base open, instead of just saying here's the open, pay for optimizations.
+We have a different model, and we're working on a more organic license that's claiming to be open even though there's 
+a forbidden royalty invovled. 
+
+We know this might be an uphill battle, but we're keeping it free for projects that make under $450,000 USD a year.
+Free for research, free for personal use, free for educational and even -infrastructure- if you pay your developers to make it.
+
+We are going to set up *reasonable* terms that are more flexible for marketplace, but stay free for anyone on the planet.
+
+
+Just one more thing. There's another quick, important reason that the current definition is over-zealous.
+
+Even if the most constrained license in the world lets me view the source code of something awesome and learn, 
+that is what matters. That's open. READ ONLY IS OPEN. We didn't used to have that, don't you remember?
+
+Especially for posterity. Patents and copyrights expire but understanding and transparency
+are more at the heart of open source. Collaboration and cooperation of course is better but it's all rather subjective!
+
+Companies brave enough to show what they have should be encouraged, even if they dont want to let everyone dissect it.
+
+Let's fascillitate faster, better, more intuitive standards with industry support. 
+
+
+
+
+
+
+Anyway, due to all the above, I'm adding the notice that the original author and copyright holder
+authorizes you to distribute Approach together with other licenses that are OSI or FSF approved. GPL,
+for instance, allows you to write GPL software using Approach and distributing together as long as 
+you get permission from the original author, and even though I didn't use it - GPL is pretty awesome sometimes.
+
+I reiterate about the current definition of open: 
+'tis but a subset of open!
+
