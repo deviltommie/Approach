@@ -1,7 +1,12 @@
 NOTICE
 
-The original author acknowledges the common rationale against using Creative Commons, Attribution-SA-NC Licensing.
+The original author acknowledges the common rationale against using Creative Commons, Attribution-SA-NC Licensing for core files.
 The original author acknowledges he is quite stubborn, also acknowledging the rationale behind said behavior below.
+
+Files in the "core" directory  are distributed under a Creative Commons, Attribution-SA-NC License.
+Files in the "base" directory are distributed under the Apache License v2.0.
+
+Below you are given permission to redistribute these files in other open source works. 
 
 ========================================================
 
@@ -14,10 +19,15 @@ For distributing alongside GPL software:
 Let it also be known this package meets the requirements of "System Library", being relied on to provide
 standard interfaces and services for software built using Approach services and functionality. 
 
-These files include, without exception, the entire directory marked "Core". 
+These files include, without exception, the entire directory marked "core". 
 This directory includes, but is not limited to, the files: 
 
 Component.php, Composition.php, Service.php, and potentially other files.
+
+This document herby also extends the same rights and priviledges of distribution regarding any 
+work contained in this software package under Open Source Initiative or Free Software Foundation approved
+licenses. This refers to but may not be limited to files in the directory marked "base" such as Render.php 
+which is provided under an Apache v2.0 license. 
 
 
 =========================================================
@@ -25,7 +35,29 @@ Component.php, Composition.php, Service.php, and potentially other files.
 The above is to let you distribute Approach along side GPL software 
 and other open licenses which require permission of the copyright holders.
 
+You may distribute approach, base and core, along software with any open license, approved by any of either: 
+the Open Source Initiative, the Free Software Foundation, or Approach Foundation LLC.
+
+
 ======================================================
+
+The copyright holder(s) of this project allow entities to release this code in 
+commercial works only under specific terms. This section does not specify a license,
+however if the net revenue or change in profit margin provided by a work does not
+exceed $450,000 (USD), the work is exempt from commercial restriction.
+
+Eligibility requires registration and approval, to avoid confusion. 
+Specific eligibility is outside the scope of this document.
+
+Contact amanda@approachfoundation.org for more information.
+
+This section is for reference purposes only and is not an agreement 
+or promisary note by Approach Foundation LLC or the original author of Approach.
+
+
+======================================================
+
+
 
 
 If you would like to skip the rationale, don't read the rest. Legal part is over. This is just a notice.
