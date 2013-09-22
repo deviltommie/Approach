@@ -22,12 +22,10 @@
 
 /*
 
-NOTICE THIS IS THE MSSQL VERSION 
-MYSQL AND MONGO ARE UNDER DEVELOPMENT, 
-MYSQL IS CLOSE TO RELEASE CANDIDATE
+NOTICE THIS IS THE MYSQLI RELEASE CANDIDATE OF DATASET
 
-IF YOU NEED PRODUCTION USAGE, ONLY MSSQL SERVER IS FINISHED
-MYSQL, MONGODB, REDIS and XML FILE CONNECTORS ON THE WAY
+IF YOU NEED PRODUCTION USAGE, USE MSSQL OR THOUROUGHLY TEST MYSQLI VERSION FOR NOW
+MONGODB, REDIS and XML FILE CONNECTORS ON THE WAY - DESIGNING CONNECTOR ARCHITECTURE CURRENTLY
 
 */
 
@@ -38,7 +36,7 @@ require_once('/../__config_database.php');
 $tableName="NULL TABLE";
 $currentTable;  //just a global, should call ApproachCurrentTable or start using a namespace.............>>>>>>>>>......yeah...
 
-
+if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';
 
 function fileSave($file, $data)
 {
@@ -49,6 +47,7 @@ function fileSave($file, $data)
 
 function SavePHP($dbo)
 {
+  global $RuntimePath;
   $theOutput = "<? \nclass " . $dbo->table . " extends Dataset { \n";
   $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
 
@@ -60,8 +59,8 @@ function SavePHP($dbo)
   $theOutput .= "\n\tpublic \$data;";
   $theOutput .= "\n}\n?>";
 
-//  print_r($theOutput);
-  fileSave($_SERVER['DOCUMENT_ROOT'] . "/Approach/Generator/Dataset/" . $dbo->table . '.php', $theOutput);
+//  print_r($theOutput);	$RuntimePath . 'Datasets/' 
+  fileSave($RuntimePath . "Datasets/" . $dbo->table . '.php', $theOutput);
 }
 
 function ms_escape_string($data) {
@@ -83,46 +82,40 @@ function ms_escape_string($data) {
     }
 
 
+function LoadDirect($query)
+{
+    $connection=new Dataset('information_schema',array('target'=>'information_schema','queryoverride'=>$query));
+    $newRow; $Container=array();
+    while($newRow=$connection->load())
+    {
+	$Container[] = $newRow;
+    }
+    return $Container;
+}
 
 function UpdateSchema()
 {
   global $Approach_PDO;
-  $sql='SELECT * FROM INFORMATION_SCHEMA.COLUMNS';
+  $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS';
 
-  $schemainfo=LoadObjects('INFORMATION_SCHEMA',array('queryoverride'=>$sql));//$pdo->exec($sql);
+  //$schemainfo=LoadObjects('INFORMATION_SCHEMA',array('queryoverride'=>$sql));//$pdo->exec($sql);
 
   $spread=array();
   $DataObjects=array();
+  $schemainfo=LoadDirect($sql);
 
   foreach($schemainfo as $SchemaRow)
   {
-    unset($SchemaRow->data['CHARACTER_MAXIMUM_LENGTH']);
-    unset($SchemaRow->data['CHARACTER_OCTET_LENGTH']);
-    unset($SchemaRow->data['NUMERIC_PRECISION']);
-    unset($SchemaRow->data['NUMERIC_PRECISION_RADIX']);
-    unset($SchemaRow->data['NUMERIC_SCALE']);
-    unset($SchemaRow->data['DATETIME_PRECISION']);
-    unset($SchemaRow->data['CHARACTER_SET_CATALOG']);
-    unset($SchemaRow->data['CHARACTER_SET_SCHEMA']);
-    unset($SchemaRow->data['CHARACTER_SET_NAME']);
-    unset($SchemaRow->data['COLLATION_CATALOG']);
-    unset($SchemaRow->data['COLLATION_SCHEMA']);
-    unset($SchemaRow->data['COLLATION_NAME']);
-    unset($SchemaRow->data['DOMAIN_CATALOG']);
-    unset($SchemaRow->data['DOMAIN_SCHEMA']);
-    unset($SchemaRow->data['DOMAIN_NAME']);
-
     $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;
   }
-
+  
   foreach($spread as $table => $columns)
   {
     $sql="SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = N'$table';";
-    $findKeys=LoadObjects('INFORMATION_SCHEMA',array('queryoverride'=>$sql));
+    $findKeys=LoadDirect($sql);
 
     $sql="SELECT * FROM INFORMATION_SCHEMA.VIEW_COLUMN_USAGE WHERE VIEW_NAME = N'$table';";
-    $keyProperties=LoadObjects('INFORMATION_SCHEMA',array('queryoverride'=>$sql));
-
+    $keyProperties=LoadDirect($sql);
 
     $dObj = new stdClass();
 
@@ -158,7 +151,10 @@ function UpdateSchema()
 
     SavePHP($dObj);
   }
+  
 }
+
+//UpdateSchema();
 
 class Dataset
 {
@@ -168,7 +164,8 @@ class Dataset
     {
         global $tableName;
         global $currentTable;
-
+        global $db;
+        
         $this->table = get_class($this);
 
         $queryoverride = 'NULL';
@@ -210,44 +207,42 @@ class Dataset
         if(isset($options['debug'])) print_r('\n\r<br>\n\r'.$buildQuery.'\n\r<br>\n\r');
         if($tableName!=$t) //Already on the right table? Don't restart the query! D:
         {
-            $currentTable=mssql_query($buildQuery);
+            $currentTable=$db->query($buildQuery);
             $tableName=$t;
         }
+        
         $this->table = $t;
 
         /* Store Options For Context, To Do: Move all $table, $key and $options into $this->___context again */
         $this->options=$options;
     }
 
-    function load() //Individual Dataset->load() will set that Dataset to last result of current query when $newRow is replaced with $this
+    function load() //Individual MySQLset->load() will set that MySQLset to last result of current query when $newRow is replaced with $this
     {
         global $currentTable;
         global $tableName;
 
         if($currentTable)
         {
-            $data = mssql_fetch_array($currentTable);
+            $data = mysqli_fetch_assoc($currentTable);
 
             $newRow = new Dataset($tableName, $this->options);   //To Do: Move to Load Objects
             if(is_array($data))
             {
-                foreach($data as $key => $value)
-                {
-                    if(!is_int($key)){ $newRow->data[$key] = $value; }  //Only get the Associative keys, not the indexed array
-                }
+                $newRow->data = $data; 
                 return $newRow;
             } else{    return false;    }
         }else{ return false; }
     }
     function save($primaryValue=NULL)  //call this function after using the new update() function. it will save changes on the php object to database.
     {
-        global $ApproachInstallRoot;
-        
+        global $RuntimePath;
+	
         if($this->PrimaryKey == '+++PARENT+++')
         {
             foreach($this->Columns as $tableName => $table)
             {
-                require_once($ApproachInstallRoot . '/Approach/Generator/Dataset/' . $tableName . '.php');
+                require_once($RuntimePath . 'Datasets/' . $tableName . '.php');
                 $AbstractedOrigin = new $tableName($tableName);
                 foreach($table as $Column => $Properties)
                 {
@@ -281,14 +276,14 @@ class Dataset
 
           if( isset($primaryValue) )
           {
-            $data = mssql_query(
+            $data = mysql_query(
             'IF( EXISTS( SELECT * FROM '.$this->table.' WHERE ' . $this->PrimaryKey . ' = ' . $this->data[$this->PrimaryKey] .' ) )
                     BEGIN UPDATE '. $this->table . ' SET ' . $valuePairs . ' WHERE ' . $this->PrimaryKey . ' = ' . $this->data[$this->PrimaryKey] .' END
              ELSE   BEGIN INSERT INTO '. $this->table . ' ( ' . $this->PrimaryKey .' '. $insertCols . ') VALUES (' . $primaryValue . ', '. $insertVals . ') END; SELECT SCOPE_IDENTITY()'
             );
           }
-          else{ $result = mssql_query('BEGIN INSERT INTO '. $this->table . ' ( ' . $insertCols . ') VALUES ( ' . $insertVals . ') END; SELECT SCOPE_IDENTITY()' ); }
-         $data=mssql_fetch_array($result);
+          else{ $result = mysql_query('BEGIN INSERT INTO '. $this->table . ' ( ' . $insertCols . ') VALUES ( ' . $insertVals . ') END; SELECT SCOPE_IDENTITY()' ); }
+         $data=mysql_fetch_array($result);
 
         }
 
@@ -296,20 +291,24 @@ class Dataset
     }
     function toPHP()
     {
-        $theOutput = "<? \nclass " . $this->table . " extends Dataset { ";
+	global $RuntimePath;
+        $theOutput = "<? \nclass " . $this->table . " extends MySQLset { ";
         foreach($this->data as $key => $value)
         {
             if($key != 'table' && $key !='key') $theOutput .= "\n\tpublic \$this->data['$key'];";
         }
         $theOutput .= "\n}\n?>";
 
-        fileSave($_SERVER['DOCUMENT_ROOT'] . "/Approach/Generator/Dataset/" . $this->table . '.php', $theOutput);
+        fileSave($RuntimePath . 'Datasets/' . $this->table . '.php', $theOutput);
     }
 
 }
 
+$DatasetMissing = new Exception('Dataset Class Definition is Missing',7);
 function LoadObjects($table, $options=Array())
 {
+    global $RuntimePath;
+    global $DatasetMissing;
     $Container=Array();
     $currentRow;
 
@@ -317,13 +316,13 @@ function LoadObjects($table, $options=Array())
 
     try
     {
-        require_once $RuntimPath . 'Approach/Datasets/' . $table . '.php';
-        $currentRow = new $table($table, $options);
+        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw $DatasetMissing;
+        else $currentRow = new $table($table, $options);
     }
     catch(Exception $e)
     {
         UpdateSchema();
-        require_once $RuntimPath . 'Approach/Datasets/' . $table . '.php';
+        require_once $RuntimePath . 'Datasets/' . $table . '.php';
     }
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D
@@ -340,19 +339,20 @@ function LoadObjects($table, $options=Array())
 
 function LoadObject($table, $options=Array())
 {
+    global $RuntimePath;
     $Container=Array();
     $currentRow;
 
     //Look For Generated DataBase Object File, If Not There Try To Make One
     try
     {
-        require_once $RuntimPath . 'Approach/Datasets/' . $table . '.php';
+        require_once $RuntimePath . 'Datasets/' . $table . '.php';
         $currentRow = new $table($table, $options);
     }
     catch(Exception $e)
     {
         UpdateSchema();
-        require_once $RuntimPath . 'Approach/Datasets/' . $table . '.php';
+        require_once $RuntimePath . 'Datasets/' . $table . '.php';
     }
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D
