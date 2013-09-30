@@ -1,5 +1,5 @@
-##Go to http://approach.im while we build up to release. Forums, blogs, tutorials and help is building up there. 
-###This is an interim site until the pure-Approach web-os is launched at approachfoundation.org 
+##Go to http://approach.im while we climb to release. Forums, blogs, tutorials and help is building up there. 
+###This is an interim site until the pure-Approach web-os (this aint no app!) is launched at approachfoundation.org 
 
 Approach
 =============
