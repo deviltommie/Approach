@@ -1,4 +1,5 @@
-### Just deploy or unpack this repository to any directory, then require_once("ApproachDirectory/Core.php"); and get to work!
+##Go to http://approach.im while we build up to release. Forums, blogs, tutorials and help is building up there. 
+###This is an interim site until the pure-Approach web-os is launched at approachfoundation.org 
 
 Approach
 =============
