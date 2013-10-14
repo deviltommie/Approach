@@ -1,0 +1,17 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+<Component:HomeDisplay type="json">
+{
+	"Featured":
+	{
+	    "img" : "poster",
+	    "headline" : "heading",
+	    "content" : "post"
+	}
+}
+</Component:HomeDisplay>
+<Render:Markup bind="HomeDisplay" tag="ul" class="Featured" >
+	<li class="Box FlowLeft" ><img src="[@ poster @]" /></li>
+	<li class="Heading">[@ heading @]</li>
+	<li class="Typography">[@ post @]</li>
+</Render:Markup>
+</Template>

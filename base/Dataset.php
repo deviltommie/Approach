@@ -48,6 +48,8 @@ function fileSave($file, $data)
 function SavePHP($dbo)
 {
   global $RuntimePath;
+  //print_r($RuntimePath);
+  
   $theOutput = "<? \nclass " . $dbo->table . " extends Dataset { \n";
   $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
 
@@ -86,6 +88,8 @@ function LoadDirect($query)
 {
     $connection=new Dataset('information_schema',array('target'=>'information_schema','queryoverride'=>$query));
     $newRow; $Container=array();
+    //var_dump($connection->load());
+
     while($newRow=$connection->load())
     {
 	$Container[] = $newRow;
@@ -95,7 +99,7 @@ function LoadDirect($query)
 
 function UpdateSchema()
 {
-  $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM `INFORMATION_SCHEMA.COLUMNS`';
+  $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS';
 
   $spread=array();
   $DataObjects=array();
@@ -103,15 +107,16 @@ function UpdateSchema()
 
   foreach($schemainfo as $SchemaRow)
   {
-    $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;
+    $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;  
   }
+  
   
   foreach($spread as $table => $columns)
   {
-    $sql="SELECT * FROM `INFORMATION_SCHEMA.KEY_COLUMN_USAGE` WHERE TABLE_NAME = N'$table';";
+    $sql="SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = N'$table';";
     $findKeys=LoadDirect($sql);
 
-    $sql="SELECT * FROM `INFORMATION_SCHEMA.VIEW_COLUMN_USAGE` WHERE VIEW_NAME = N'$table';";
+    $sql="SELECT * FROM INFORMATION_SCHEMA.VIEW_COLUMN_USAGE WHERE VIEW_NAME = N'$table';";
     $keyProperties=LoadDirect($sql);
 
     $dObj = new stdClass();
@@ -139,19 +144,19 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-/*
-    print_r('<br><br><br><br><br>');
+
+    /*print_r('<br><br><br><br><br>');
     print_r($dObj->PrimaryKey);
     print_r('<br><br><br><br><br>');
     print_r($dObj);
     print_r('<br><br><br><br><br>');
-*/
+    */
     SavePHP($dObj);
   }
   
 }
 
-UpdateSchema();
+//UpdateSchema();
 
 class Dataset
 {
@@ -201,7 +206,7 @@ class Dataset
 	
 	//operator + properties FROM target + method + condition
 	
-        $buildQuery = $command .' '. $range .' FROM `'. $target .'` '. $method .' '. $condition;
+        $buildQuery = $command .' '. $range .' FROM '. $target .' '. $method .' '. $condition;
         if($queryoverride != 'NULL') $buildQuery = $queryoverride;
         $options['queryoverride']=$buildQuery;
         if(isset($options['debug'])) print_r('\n\r<br>\n\r'.$buildQuery.'\n\r<br>\n\r');
@@ -304,7 +309,13 @@ class Dataset
 
 }
 
-$DatasetMissing = new Exception('Dataset Class Definition is Missing',7);
+function DataclassError($errno, $errstr, $errfile, $errline, array $errcontext)
+{
+    // error was suppressed with the @-operator
+    if (0 === error_reporting()) {        return false;    }
+    else throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+}
+
 function LoadObjects($table, $options=Array())
 {
     global $RuntimePath;
@@ -316,10 +327,10 @@ function LoadObjects($table, $options=Array())
 
     try
     {
-        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw $DatasetMissing;
+        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw new ErrorException("Data missing");
         else $currentRow = new $table($table, $options);
     }
-    catch(Exception $e)
+    catch(ErrorException $e)
     {
         UpdateSchema();
         require_once $RuntimePath . 'Datasets/' . $table . '.php';
@@ -345,13 +356,15 @@ function LoadObject($table, $options=Array())
     $Container=Array();
     $currentRow;
 
+    $originalHandler=set_error_handler('DataclassError');
+        
     //Look For Generated DataBase Object File, If Not There Try To Make One
     try
     {
         if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw $DatasetMissing;
         $currentRow = new $table($table, $options);
     }
-    catch(Exception $e)
+    catch(ErrorException $e)
     {
         UpdateSchema();
         require_once $RuntimePath . 'Datasets/' . $table . '.php';
@@ -369,6 +382,6 @@ function LoadObject($table, $options=Array())
     return $Container;
 }
 
-//UpdateSchema();
+
 
 ?>
