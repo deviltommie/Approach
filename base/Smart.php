@@ -1,27 +1,25 @@
 <?php
 
 /*
-	Title: Smart Templating Class for Approach
+    Title: Smart Templating Class for Approach
 
+    Copyright 2002-2014 Garet Claborn
 
-	Copyright 2002-2014 Garet Claborn
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
 
-	http://www.apache.org/licenses/LICENSE-2.0
-
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
-
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 */
 
 require_once('Render.php');
-
+require_once('Utility.php');
 
 class Smart extends renderable
 {
@@ -49,28 +47,33 @@ class Smart extends renderable
             $this->classes = $options['classes'];
         }
 
-
         if(isset($this->markup) && $this->markup != null)
         {
-
             $dataSet=simplexml_load_string($this->markup);
+
             $templateHeaders=$dataSet->xpath('//Component:*');
+            $markupHeaders=$dataSet->xpath('//Render:*');
 
             foreach($templateHeaders as $template)
             {
-               $this->TemplateBinding[$template->getName()] = json_decode($template,true);
-               array_shift($dataSet);
+               $this->TemplateBinding[$template->getName()] = json_decode((string)$template,true);
             }
             unset($templateHeaders);
-            $this->markup=$dataSet;
 
+	    $markup=array();
+
+            foreach($markupHeaders as $mark)
+	    {
+		//To Do: Bring Optimized XML Parser To Utility.
+		$markup[]=strrev( explode('<',	strrev( explode('>',$mark->asXML(),2)[1]	),2)[1] );
+	    }
            /*
-            $dataSet = ("•••••••••••••••••••••",$this->markup);
+            $dataSet = explode("•••••••••••••••••••••",$this->markup);  //really this old method was very fast, but non-standard
             $tokens=Array();
             $this->TemplateBinding = json_decode($dataSet[0], true);
             array_shift($dataSet); $this->markup = $dataSet;
            */
-            //$this->markup = $dataSet[1];
+            $this->markup = $markup;
         }
 
         $this->BindContext();
@@ -80,6 +83,7 @@ class Smart extends renderable
     {
       $ActiveComponent='';
       $i=0;   $IsComponent;
+      
       foreach($this->TemplateBinding as $ComponentName => $Component)
       {
           $IsComponent=false;
@@ -104,14 +108,17 @@ class Smart extends renderable
           if($IsComponent)
           {
             $ActiveComponent = $ComponentName;
-
-            if(gettype(reset($Component)) === gettype("string"))
+            
+	    if(gettype(reset($Component)) === gettype("string"))
             {
                 $i++;
             }
+	    /*print_r($ComponentName);
+	    print_r($Component);
+	    */
             foreach($Component as $Name => $Table)
-            {
-              $TablesHolder[]=$Name;
+            {	
+	      $TablesHolder[]=$Name;
               if(!isset($this->options[$ActiveComponent][$Name]) && isset($this->options[$ActiveComponent]['ALL']) ) //Propagate options to all
               {
                   $this->options[$ActiveComponent][$Name]=$this->options[$ActiveComponent]['ALL'];
@@ -119,14 +126,15 @@ class Smart extends renderable
               if(!isset($this->options[$ActiveComponent][$Name]))
               {
                   $this->options[$ActiveComponent][$Name] = array();
+		//  $this->options[$ActiveComponent][$Name][] = $Table;		  
               }
+	      //else{ $this->options[$ActiveComponent][$Name][] = $Table; }
             }
 
             $context['render']=$this->id;
             $context['data']=$TablesHolder;
             $context['options']=$this->options[$ActiveComponent];
             $context['template']=$this->options['template_path'];
-
 
             $this->context[$ActiveComponent]=$context;
           }
@@ -157,7 +165,7 @@ class Smart extends renderable
       }
     }
 
-      /* MASSIVE PERFORMANCE LOSS,  FIND OPTIMIZED ARRAY STRING REPLACE */
+    /* PERFORMANCE LOSS,  FIND OPTIMIZED ARRAY STRING REPLACE */
     function buildContent()
     {
         $this->Tokenize();
@@ -167,20 +175,13 @@ class Smart extends renderable
         {
             foreach($this->tokens as $token => $value)
             {
-                $this->markup[$markupIndex]=str_replace('['.$token.']', $value, $this->markup[$markupIndex]);
+                $this->markup[$markupIndex]=str_replace('[@ '.$token.' @]', $value, $this->markup[$markupIndex]);
                 $this->markup[$markupIndex]=$this->parse($this->markup[$markupIndex]);
             }
             $this->content = $this->markup[$markupIndex];
         }
-
         parent::buildContent();    //Render Children Into Content with normal build content function
     }
 }
 
-
-
-
 ?>
-
-
-

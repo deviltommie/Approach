@@ -34,7 +34,7 @@ require_once('/../__config_error.php');
 require_once('/../__config_database.php');
 
 $tableName="NULL TABLE";
-$currentTable;  //just a global, should call ApproachCurrentTable or start using a namespace.............>>>>>>>>>......yeah...
+$currentTable;
 
 if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';
 
@@ -95,10 +95,7 @@ function LoadDirect($query)
 
 function UpdateSchema()
 {
-  global $Approach_PDO;
-  $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS';
-
-  //$schemainfo=LoadObjects('INFORMATION_SCHEMA',array('queryoverride'=>$sql));//$pdo->exec($sql);
+  $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM `INFORMATION_SCHEMA.COLUMNS`';
 
   $spread=array();
   $DataObjects=array();
@@ -111,10 +108,10 @@ function UpdateSchema()
   
   foreach($spread as $table => $columns)
   {
-    $sql="SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = N'$table';";
+    $sql="SELECT * FROM `INFORMATION_SCHEMA.KEY_COLUMN_USAGE` WHERE TABLE_NAME = N'$table';";
     $findKeys=LoadDirect($sql);
 
-    $sql="SELECT * FROM INFORMATION_SCHEMA.VIEW_COLUMN_USAGE WHERE VIEW_NAME = N'$table';";
+    $sql="SELECT * FROM `INFORMATION_SCHEMA.VIEW_COLUMN_USAGE` WHERE VIEW_NAME = N'$table';";
     $keyProperties=LoadDirect($sql);
 
     $dObj = new stdClass();
@@ -142,19 +139,19 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-
+/*
     print_r('<br><br><br><br><br>');
     print_r($dObj->PrimaryKey);
     print_r('<br><br><br><br><br>');
     print_r($dObj);
     print_r('<br><br><br><br><br>');
-
+*/
     SavePHP($dObj);
   }
   
 }
 
-//UpdateSchema();
+UpdateSchema();
 
 class Dataset
 {
@@ -173,8 +170,8 @@ class Dataset
         /* Default to selecting top 10 rows of the database */
         /* To Do: Default to all if !$ApproachDebugMode ? */
 
-        $command='SELECT';
-        $range='TOP 1 * ';
+        $command='SELECT * ';
+        $range='';
         $target= isset($t)? $t : get_class($this);
         $method='';
         $condition='';
@@ -201,7 +198,10 @@ class Dataset
 
         /* Prepare  SQL Query And Ask The Database */
 
-        $buildQuery = $command .' '. $range .' FROM ['. $target .'] '. $method .' '. $condition;
+	
+	//operator + properties FROM target + method + condition
+	
+        $buildQuery = $command .' '. $range .' FROM `'. $target .'` '. $method .' '. $condition;
         if($queryoverride != 'NULL') $buildQuery = $queryoverride;
         $options['queryoverride']=$buildQuery;
         if(isset($options['debug'])) print_r('\n\r<br>\n\r'.$buildQuery.'\n\r<br>\n\r');
@@ -327,6 +327,7 @@ function LoadObjects($table, $options=Array())
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D
     $newRow;
+    
     while($newRow=$currentRow->load())
     {
         $Container[] = $newRow;
@@ -340,13 +341,14 @@ function LoadObjects($table, $options=Array())
 function LoadObject($table, $options=Array())
 {
     global $RuntimePath;
+    global $DatasetMissing;
     $Container=Array();
     $currentRow;
 
     //Look For Generated DataBase Object File, If Not There Try To Make One
     try
     {
-        require_once $RuntimePath . 'Datasets/' . $table . '.php';
+        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw $DatasetMissing;
         $currentRow = new $table($table, $options);
     }
     catch(Exception $e)

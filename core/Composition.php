@@ -49,21 +49,29 @@ class Composition
 {
     public $DOM;
     public $ComponentList=Array();
+    
     public $options;
-
-    //RSS Compliance Derrives from this values. All Compositions must be able to be sent as RSS, mRSS or custom XML Feed with XSL Rules
-    public $CompositionID;
-    public $Title;
-    public $Blurb;
-    public $Description;
-    public $Thumbnail;
-
-    public $TrackingData;   
-    public $SocialData;
+    public $meta;
+    public $intents;
 
     public $editable=Array();
 
-    public function ResolveComponents($DOM)
+    function Composition()
+    {
+        global $ActiveComposition;
+        $ActiveComposition = $this;
+    }
+
+    function init($options=array())
+    {
+        global $APPROACH_DOM_ROOT;
+        global $$APPROACH_DOM_ROOT;
+
+        $this->DOM = $$APPROACH_DOM_ROOT;
+        $this->options = $options;
+    }
+    
+    public function ResolveComponents(&$DOM)
     {
         $editCount=0;
         global $APPROACH_EDITMODE;
@@ -97,21 +105,6 @@ class Composition
         }
     }
 
-    function Composition()
-    {
-        global $ActiveComposition;
-        $ActiveComposition = $this;
-    }
-
-    function init($options=array())
-    {
-        global $APPROACH_DOM_ROOT;
-        global $$APPROACH_DOM_ROOT;
-
-        $this->DOM = $$APPROACH_DOM_ROOT;
-        $this->options = $options;
-    }
-
     function publish($silent=false)
     {
         global $RegisteredScripts;
@@ -121,13 +114,13 @@ class Composition
         global $ApproachDebugConsole;
         global $ApproachDebugMode;
 
-
         $$APPROACH_DOM_ROOT = $this->DOM;
 
         $this->ResolveComponents($this->DOM);
 
         foreach($this->ComponentList as $ComponentInstance => $Instances)
         {
+            $test='asdf';
             foreach($Instances as $Context)
             {
                 $Component = new $ComponentInstance();
@@ -135,7 +128,6 @@ class Composition
                 $Component->Load($Context['options']);
             }
         }
-
         foreach($this->editable as &$editableFeature)
         {
             $references=array();
@@ -170,12 +162,11 @@ class Composition
             }
         }
 
-
-
         /*  THIS IS WHERE THE HEADER SHOULD GET SENT    */
         header('Access-Control-Allow-Origin: *');
-        if(!$silent) print_r($this->DOM->render()); //Deploy html response - usually
+	if(!$silent) print_r('<!DOCTYPE html>'.PHP_EOL.$this->DOM->render()); //Deploy html response - usually
         elseif($silent && isset($this->options['toFile'])) toFile($this->options['toFile'], $this->DOM->render());
+	
     }
 }
 

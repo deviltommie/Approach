@@ -38,8 +38,8 @@ $rss->tag='rss';
 These functions let you primarily search through types of class renderable by
 common CSS selectors such as ID, Class, Attribute and Tag. 
 
-Also the jQuery Events have a require listed at the bottom of this source
-jQuery events need to look for your </head> element *or* the  </body> elemenet
+Also the JavaScript Events have a require listed at the bottom of this source
+JavaScript events need to look for your </head> element *or* the  </body> elemenet
 and dynamically place event bindings, script linking or direct code at these 
 locations.
 
@@ -59,8 +59,6 @@ $MultiElements=function GetRenderablesByTag($root, 'div');
 
 
 */
-
-
 
 
 function filter( $tag, $content, $styles, $properties)
@@ -209,6 +207,6 @@ function GetBodyFromDOM()
 $ApproachDebugConsole = new renderable('div', 'ApproachDebugConsole');
 $ApproachDebugMode = false;
 
-require_once('jQueryEvents.php');
+require_once('ClientEvents.php');
 
 ?>

@@ -46,7 +46,6 @@ class renderable
         $this->id=$renderObjectIndex;
         $renderObjectIndex++;                /*    Register New Renderable    */
 
-
 	if( is_array($t) ){ $options = $t; $this->tag= $t['tag'];}
         else $this->tag = $t;
         if(isset($options['template'])) $this->content = GetFile($options['template']);
@@ -60,7 +59,6 @@ class renderable
         if(isset($options['attributes'])) $this->attributes = $options['attributes'];
         if(isset($options['selfcontained'])) $this->selfContained = $options['selfcontained'];
         if(isset($options['content'])) $this->content = $options['content'] . $this->content;
-
     }
 
     public function buildClasses()
@@ -82,7 +80,6 @@ class renderable
         {
           return $this->classes=get_class($this) . $this->pageID . '';
         }
-
     }
     public function buildContent()
     {
@@ -107,25 +104,25 @@ class renderable
     {
         if($string[$i]=='<')   //Start Of Tag Detected
         {
-          if(substr($string, $i, 11) == '<?-- / --?>') //End Injector
+          if(substr($string, $i, 11) == '<@-- / --@>') //End Injector
           {
             $Condition['Close']['Start']=$i;
           }
-          elseif(substr($string, $i, 4) == '<?--')    //Injector Detected
+          elseif(substr($string, $i, 4) == '<@--')    //Injector Detected
           {
             $Condition['Open']['Start']=$i;
           }
         }
         if($string[$i]=='>')  //End Of Tag Detected
         {
-          if(substr($string, $i-10, 11) == '<?-- / --?>')
+          if(substr($string, $i-10, 11) == '<@-- / --@>')
           {
               $Condition['Close']['End']=$i;
               $Evaluate = substr( $string, $Condition['Open']['Start']+4, $Condition['Open']['End']-$Condition['Open']['Start']-8);
               $Evaluate .= PHP_EOL . '{ return "true"; } '.PHP_EOL.'else{ return "false"; }';
-              $Condition['result']=eval( $Evaluate );
+              $Condition['result']=eval( $Evaluate );	//Template expression blocks
           }
-          elseif(substr($string, $i-3, 4) == '--?>')
+          elseif(substr($string, $i-3, 4) == '--@>')
           {
             $Condition['Open']['End']=$i;
           }
@@ -143,7 +140,7 @@ class renderable
       else{$InnerStatements=$InnerStatements;}
       $string=str_replace(substr($string, $Condition['Open']['Start'], $Condition['Close']['End'] - $Condition['Open']['Start']+1 ), $InnerStatements, $string);
 
-      if(strpos($InnerStatements, '<?--') != false) $Saved[]=$this->parse($InnerStatements);
+      if(strpos($InnerStatements, '<@--') != false) $Saved[]=$this->parse($InnerStatements);
       $begin=$Condition['Close']['End'];
     }
 
@@ -156,7 +153,6 @@ class renderable
         $attribsToString=' ';
         if(is_array($this->attributes) )
         {
-
             foreach($this->attributes as $att=>$val)
             {
                 if(is_array($val) )
@@ -181,7 +177,6 @@ class renderable
 
     public function render()
     {
-
         $OutputStream='';
         $FrontendMarkup=$this->content; $this->content='';
 
@@ -189,20 +184,22 @@ class renderable
         $this->buildClasses();
         $this->buildContent();
 
-
         if($this->classes == ' class=" " ' || $this->classes == ' class="" ') $this->classes = '';
         if($this->attributes === 0){ $this->attributes = '';     }
 
         $pageID = ( isset($this->pageID) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'body' && $this->tag != 'script' && $this->tag != 'style' && $this->tag != 'channel' && $this->tag != 'rss' && $this->tag != 'item' ) ) ?  ' id="' . $this->pageID . '" ' : '';
         $this->classes = ( isset($this->classes) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'body' && $this->tag != 'script' && $this->tag != 'style' && $this->tag != 'channel' && $this->tag != 'rss' && $this->tag != 'item' ) ) ?  $this->classes : '';
         $this->attributes = ( isset($this->attributes) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'script' && $this->tag != 'style') ) ?  $this->attributes : '';
-
-            if($this->tag == 'rss') $this->attributes = ' version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ';
+	
+	
+	//What was the cause of this bug?? Has been lost in translation
+	if($this->attributes === '0 =""' || $this->attributes==0){ $this->attributes = '';     }
+        if($this->tag == 'rss') $this->attributes = ' version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ';
+	
 
         $OutputStream = '<' . $this->tag . $this->attributes . $this->classes . $pageID ;
-        if($this->selfContained) $OutputStream.=' />'."\n\r";
-        else $OutputStream.= ' >' . $FrontendMarkup . $this->content . '</' . $this->tag . '>' . "\n\r";
-
+        if($this->selfContained) $OutputStream.='/>'."\n\r";
+        else $OutputStream.= '>' . $FrontendMarkup . $this->content . '</' . $this->tag . '>' . "\n\r";
 
         return $OutputStream;
     }

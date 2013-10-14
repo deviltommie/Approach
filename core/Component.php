@@ -43,6 +43,9 @@
 
 
 require_once('/../base/Render.php');
+require_once('/../base/Utility.php');
+require_once('/../base/ClientEvents.php');
+require_once('/../base/Smart.php');
 require_once('/../base/Dataset.php');
 
 class Component
@@ -118,8 +121,6 @@ class Component
         if(isset($this->Scripts))           $Scripts            =$this->Scripts;
         if(isset($this->ScriptPlacement))   $ScriptPlacement    =$this->ScriptPlacement;
 
-
-
         //Optional Overrides
         if(is_array($options))
         {
@@ -177,8 +178,6 @@ class Component
       $TChildTag = $ChildTag;
       $ChildTag = array();
 
-
-
       if( is_array($TChildClasses) )
       {
           if( is_array( reset($TChildClasses) ) )                      $ChildClasses = array_values($TChildClasses);
@@ -187,10 +186,7 @@ class Component
       else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){                  $ChildClasses[$i]=$TChildClasses;      }}
 
       if( is_array($TChildAttributes) )
-      {    if(get_class($this)=='Player')
-           {
-
-           }
+      {    
           if( is_array( reset($TChildAttributes) ) ){                   $ChildAttributes = array_values($TChildAttributes);}
           else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){              $ChildAttributes[$i]=$TChildAttributes;          }}
       }                                                                                                     //
@@ -232,6 +228,7 @@ class Component
       $this->PostProcess($BuildData, $ParentContainer);
     }
 
+    function PreProcess($BuildData, $ParentContainer){ /* $ParentContainer->children[]= $t=new renderable('div'); $t->content=var_export($BuildData, true); */ }
     function PostProcess($BuildData, $ParentContainer){}
 
     function Save($IncomingTokens, $TemplateBinding)
@@ -308,19 +305,20 @@ class Massive extends Component
     public $ChildTag = 'li';
 
     public $ChildClasses = array
-                          (
-                            'SlideMarkup' => array
-                            (
-                                'Slide'
-                            ),
-                            'ControlMarkup' => array
-                            (
-                                'ControlButton'
-                            )
-                          );
+    (
+      'SlideMarkup' => array
+      (
+          'Slide'
+      ),
+      'ControlMarkup' => array
+      (
+          'ControlButton'
+      )
+    );
 
     public $ContainerClasses = array('Massive');
 }
+
 class Post extends Component
 {
     public $RenderType = 'Smart';
@@ -425,6 +423,11 @@ class Player extends Component
         $r->content=var_export(/*$a*/$BuildData, true);
         $b->children[]=$r;
     }
+}
+
+class HomeDisplay extends Component
+{
+    public $ChildTag='ul';
 }
 
 
