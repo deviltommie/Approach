@@ -1,6 +1,7 @@
 <?php
 
 
+$PublicURI='http://approachfoundation.org';
 $TotalNodes =0;
 class treenode
 {
@@ -19,7 +20,8 @@ class treenode
 
 function treesert(&$branch, $values) //@arg links,values
 {
-    $head = array_shift($values);
+    foreach($values as $key=>$value){    $head = array($key=>$value); break;    }
+    array_shift($values);
     $result = false;
     foreach($branch as $leaf)
     {
@@ -43,7 +45,7 @@ function treesert(&$branch, $values) //@arg links,values
 }
 
 $NavigationChains=array();
-$NavigationChains[]=array('Approach', 'Direction');
+$NavigationChains[]=array('Approach'=>$PublicURI, 'Blog'=>$PublicURI.'/blog');
 /*$NavigationChains[]=array('Approach', 'Profile');
 $NavigationChains[]=array('Approach', 'Projects');
 $NavigationChains[]=array('Approach', 'Announcements');
@@ -53,7 +55,7 @@ $NavigationChains[]=array('Approach', 'Foundation Contact');
 */
 
 
-$NavigationChains[]=array('Source++','Download');
+$NavigationChains[]=array('Source++'=>$PublicURI.'/source','Download'=>$PublicURI);
 /*$NavigationChains[]=array('Source++','Developers','Team++');
 $NavigationChains[]=array('Source++','Developers','Tutorials');
 $NavigationChains[]=array('Source++','Developers','Examples');
@@ -96,14 +98,14 @@ $NavigationChains[]=array('Source++','Users','Advanced Topics','Service Chains')
 $NavigationChains[]=array('Source++','Users','Advanced Topics','Orchestration');
 $NavigationChains[]=array('Source++','Users','Advanced Topics','Ascended Transformations');
 */
-$NavigationChains[]=array('Cloud++','Marketplace');
+$NavigationChains[]=array('Cloud++'=>$PublicURI.'/cloud','Team++'=>$PublicURI.'/cloud/team');
 /*$NavigationChains[]=array('Cloud++','Cloud Launch');
 $NavigationChains[]=array('Cloud++','And.. What\'s So Organic?');
 $NavigationChains[]=array('Cloud++','Cool Facts');
 $NavigationChains[]=array('Cloud++','Intro Videos');
 $NavigationChains[]=array('Cloud++','Apps That Friend');
 */
-$NavigationChains[]=array('Team++','Topics');
+$NavigationChains[]=array('Market++'=>$PublicURI.'/market','Storefront'=>$PublicURI.'/market/explore');
 /*$NavigationChains[]=array('Team++','Forums');
 $NavigationChains[]=array('Team++','Projects');
 $NavigationChains[]=array('Team++','Blogs');
@@ -125,8 +127,12 @@ function PopulateNav(&$container, &$tree)
     foreach($tree as &$menu)
     {
         $MenuItem=new renderable('li', 'nav'.$i);
-        $MenuLabel=(new renderable('a'));
-        $MenuLabel->content=$menu->value;
+        $MenuLabel=new renderable('a');
+        foreach($menu->value as $label => $hyperlink)
+        {
+            $MenuLabel->content=$label;
+            $MenuLabel->attributes['href']=$hyperlink;
+        }
         $SubMenu=new renderable('ul');
         $SubMenu->classes[]='SubNav';
         $SubMenu->classes[]='local_'.$i;

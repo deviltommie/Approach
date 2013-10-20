@@ -1,6 +1,6 @@
 <?php
 
-require_once( '../../approach/core.php');
+require_once('../../approach/core.php');
 require_once('navigation.php');
 
 
@@ -21,10 +21,6 @@ $head->content='
 
 
 <link rel="stylesheet" type="text/css" href="'.$StaticFiles.'css/layout.css">
-<!--
-<script type="text/javascript" src="'.$StaticFiles.'js/raphael-min.js"></script>
-<script type="text/javascript" src="'.$StaticFiles.'js/cat.js"> </script>
--->
 
 <link href="http://fonts.googleapis.com/css?family=Signika:700,600,400,300" rel="stylesheet" type="text/css">
 <link href="http://fonts.googleapis.com/css?family=Signika:700,600,400,300|Quattrocento+Sans:400,700italic,400italic,700" rel="stylesheet" type="text/css">

@@ -9,9 +9,9 @@
 	}
 }
 </Component:HomeDisplay>
-<Render:Markup bind="HomeDisplay" tag="ul" class="Featured" >
-	<li class="Box FlowLeft" ><img src="[@ poster @]" /></li>
-	<li class="Heading">[@ heading @]</li>
-	<li class="Typography">[@ post @]</li>
+<Render:Markup bind="HomeDisplay" tag="li" class="Featured" >
+	<span class="Box FlowLeft" ><img src="[@ poster @]" /></span>
+	<span class="Heading">[@ heading @]</span>
+	<article class="Typography">[@ post @]</article>
 </Render:Markup>
 </Template>

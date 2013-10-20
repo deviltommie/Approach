@@ -27,6 +27,12 @@ NOTICE THIS IS THE MYSQLI RELEASE CANDIDATE OF DATASET
 IF YOU NEED PRODUCTION USAGE, USE MSSQL OR THOUROUGHLY TEST MYSQLI VERSION FOR NOW
 MONGODB, REDIS and XML FILE CONNECTORS ON THE WAY - DESIGNING CONNECTOR ARCHITECTURE CURRENTLY
 
+Request For Comments:
+1. 	The Generator needs to understand connectors somehow, very cleanly.
+2. 	Before or after moving data into the profile property, the concept of PrimaryKey/Foreign Keys
+	needs to be made generic
+3. 	How can we make the search functionality stronger, easier to batch, more intuitive and/or more generic?
+ 
 */
 
 
@@ -48,8 +54,9 @@ function fileSave($file, $data)
 function SavePHP($dbo)
 {
   global $RuntimePath;
-  //print_r($RuntimePath);
-  
+    /*
+     *	To Do: Move Variables into a public static Dataset::profile map
+     */
   $theOutput = "<? \nclass " . $dbo->table . " extends Dataset { \n";
   $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
 
@@ -88,12 +95,8 @@ function LoadDirect($query)
 {
     $connection=new Dataset('information_schema',array('target'=>'information_schema','queryoverride'=>$query));
     $newRow; $Container=array();
-    //var_dump($connection->load());
 
-    while($newRow=$connection->load())
-    {
-	$Container[] = $newRow;
-    }
+    while($newRow=$connection->load()){	$Container[] = $newRow;    }
     return $Container;
 }
 
@@ -108,8 +111,7 @@ function UpdateSchema()
   foreach($schemainfo as $SchemaRow)
   {
     $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;  
-  }
-  
+  }  
   
   foreach($spread as $table => $columns)
   {
@@ -144,16 +146,8 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-
-    /*print_r('<br><br><br><br><br>');
-    print_r($dObj->PrimaryKey);
-    print_r('<br><br><br><br><br>');
-    print_r($dObj);
-    print_r('<br><br><br><br><br>');
-    */
     SavePHP($dObj);
   }
-  
 }
 
 //UpdateSchema();
@@ -202,7 +196,6 @@ class Dataset
         $options['queryoverride']   = $queryoverride;
 
         /* Prepare  SQL Query And Ask The Database */
-
 	
 	//operator + properties FROM target + method + condition
 	
@@ -311,7 +304,6 @@ class Dataset
 
 function DataclassError($errno, $errstr, $errfile, $errline, array $errcontext)
 {
-    // error was suppressed with the @-operator
     if (0 === error_reporting()) {        return false;    }
     else throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
 }
@@ -372,6 +364,7 @@ function LoadObject($table, $options=Array())
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D
     $newRow;
+    
     if($newRow=$currentRow->load())
     {
         $Container = $newRow;

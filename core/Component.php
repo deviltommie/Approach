@@ -2,18 +2,14 @@
 
 /*************************************************************************
 
- Title: Components for Approach
- Name: Component
- Original Author: Garet Claborn, garet@approachfoundation.org
-
- APPROACH 
+ APPROACH
  Organic, human driven software.
 
 
  COPYRIGHT NOTICE
  __________________
 
- (C) Copyright 2002-2013 - Approach Foundation LLC, Garet Claborn
+ (C) Copyright 2012 - Approach Foundation LLC, Garet Claborn
  All Rights Reserved.
 
  Notice: All information contained herein is, and remains
@@ -51,7 +47,7 @@ require_once('/../base/Dataset.php');
 class Component
 {
     public $context = array();
-    public $UpdateRow=array();
+    public $UpdateInstance=array();
 
     function CreateContext($render,$data, $template)
     {
@@ -104,7 +100,9 @@ class Component
         $ChildTag           = 'div';
         $ContainerClasses   = Array(get_class($this));
         $ChildClasses       = Array(get_class($this).'Child');
-        $ChildAttributes    = Array('');
+        
+        //This is annoying, there's a better way to initialy cast to associative array, right?
+        $ChildAttributes    = Array('nullattr'=>'');    unset($ChildAttributes['nullattr']);
         $Items              = Array();
         $BuildData          = Array();
         $ParentContainer    = GetRenderable($root,$this->context['render']);
@@ -160,7 +158,7 @@ class Component
               if( isset($APPROACH_SAVE_FLAG[get_class($this)][$i]) )
               if( $APPROACH_SAVE_FLAG[get_class($this)][$i] == true )
               {
-                $this->UpdateRow[$table] = $item->data;
+                $this->UpdateInstance[$table] = $item->data;
               }
               $i++;
           }
@@ -240,24 +238,24 @@ class Component
         foreach($Tables as $Name => $PropertyList)
         {
           $ActiveTable = $Name;
-          if( isset($this->UpdateRow[$Name]) )
+          if( isset($this->UpdateInstance[$Name]) )
           {
             $Primary = '';
             require_once $_SERVER['DOCUMENT_ROOT'] . '/Approach/Generator/DataObject/' . $Name . '.php';
             $dbo = new $Name($Name);
 
-            foreach($this->UpdateRow[$Name] as $k => $v)
+            foreach($this->UpdateInstance[$Name] as $k => $v)
             {
                 $dbo->data[$k] = $v;
             }
 
-            foreach($PropertyList as $Column => $TokenName)
+            foreach($PropertyList as $Property => $TokenName)
             {
-              if( isset($dbo->data[$Column]) && isset($IncomingTokens['_'.$TokenName]) )
+              if( isset($dbo->data[$Property]) && isset($IncomingTokens['_'.$TokenName]) )
               {
-                  $temp=$dbo->data[$Column];
-                  $dbo->data[$Column] = $IncomingTokens['_'.$TokenName];
-                  if($temp!=$dbo->data[$Column]) $change = true;
+                  $temp=$dbo->data[$Property];
+                  $dbo->data[$Property] = $IncomingTokens['_'.$TokenName];
+                  if($temp!=$dbo->data[$Property]) $change = true;
               }
             }
 
@@ -366,31 +364,31 @@ class Player extends Component
         {
             $this->ChildTag = array( 'object', 'ul');
             $this->ChildAttributes = array
-                             (
-                                  'VideoMarkup' =>array
-                                  (
-                                        'width'=>'640',
-                                        'height'=>'480',
-                                        'align'=>'middle',
-                                        'classid'=>'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000'
+            (
+                 'VideoMarkup' =>array
+                 (
+                       'width'=>'640',
+                       'height'=>'480',
+                       'align'=>'middle',
+                       'classid'=>'clsid:d27cdb6e-ae6d-11cf-96b8-444553540000'
 
-                                  ),
-                                  'ControlMarkup' => array()
-                             );
+                 ),
+                 'ControlMarkup' => array()
+            );
         }
     }
     public $RenderType = 'Smart';
     public $ChildClasses = array
-                          (
-                            'VideoMarkup' => array
-                            (
-                                'video'
-                            ),
-                            'ControlMarkup' => array
-                            (
-                                'controls'
-                            )
-                          );
+            (
+              'VideoMarkup' => array
+              (
+                  'video'
+              ),
+              'ControlMarkup' => array
+              (
+                  'controls'
+              )
+            );
     public $ContainerClasses = array('Player');
     public $ScriptPlacement = true;
 
@@ -427,7 +425,10 @@ class Player extends Component
 
 class HomeDisplay extends Component
 {
-    public $ChildTag='ul';
+    public $ChildTag='li';
+    public $RenderType = 'Smart';
+    public $ChildClasses = array('nav','nav-pills', 'nav-stacked');
+
 }
 
 

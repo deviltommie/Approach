@@ -1,42 +1,42 @@
 <? 
-class sets extends Dataset { 
+class types extends Dataset { 
 
 	public $Columns=array (
   'id' => 
   array (
     'TABLE_CATALOG' => 'def',
     'TABLE_SCHEMA' => 'approach',
-    'TABLE_NAME' => 'sets',
+    'TABLE_NAME' => 'types',
     'COLUMN_NAME' => 'id',
     'ORDINAL_POSITION' => '1',
     'COLUMN_DEFAULT' => NULL,
     'IS_NULLABLE' => 'NO',
     'DATA_TYPE' => 'bigint',
   ),
-  'pointer' => 
+  'Parent' => 
   array (
     'TABLE_CATALOG' => 'def',
     'TABLE_SCHEMA' => 'approach',
-    'TABLE_NAME' => 'sets',
-    'COLUMN_NAME' => 'pointer',
+    'TABLE_NAME' => 'types',
+    'COLUMN_NAME' => 'Parent',
     'ORDINAL_POSITION' => '2',
-    'COLUMN_DEFAULT' => NULL,
-    'IS_NULLABLE' => 'YES',
-    'DATA_TYPE' => 'bigint',
-  ),
-  'type' => 
-  array (
-    'TABLE_CATALOG' => 'def',
-    'TABLE_SCHEMA' => 'approach',
-    'TABLE_NAME' => 'sets',
-    'COLUMN_NAME' => 'type',
-    'ORDINAL_POSITION' => '3',
-    'COLUMN_DEFAULT' => '1024',
+    'COLUMN_DEFAULT' => '0',
     'IS_NULLABLE' => 'NO',
     'DATA_TYPE' => 'bigint',
   ),
+  'Name' => 
+  array (
+    'TABLE_CATALOG' => 'def',
+    'TABLE_SCHEMA' => 'approach',
+    'TABLE_NAME' => 'types',
+    'COLUMN_NAME' => 'Name',
+    'ORDINAL_POSITION' => '3',
+    'COLUMN_DEFAULT' => 'undefined root',
+    'IS_NULLABLE' => 'NO',
+    'DATA_TYPE' => 'varchar',
+  ),
 );
-	public $table='sets';
+	public $table='types';
 	public $PrimaryKey='+++PARENT+++';
 	public $data;
 }

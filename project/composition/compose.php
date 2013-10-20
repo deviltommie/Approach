@@ -10,8 +10,7 @@ $PostOptions=array();
 $PostOptions['template_path']=$RunPath . 'Templates/featured.xml';
 $PostOptions['featured']['ALL']['target'] = 'featured';
 
-$DisplayArea['Stage']->children[]=$Featured=new Smart('ul', $PostOptions);
-$Featured->classes[]='Feature';
+$screen->children[] = $DisplayArea['Feature']=new Smart('li', $PostOptions);
 
 
 ?>

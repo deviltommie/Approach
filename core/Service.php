@@ -2,10 +2,6 @@
 
 /*************************************************************************
 
- Title: Web and System Services for Approach
- Name: Service
- Original Author: Garet Claborn, garet@approachfoundation.org
-
  APPROACH 
  Organic, human driven software.
 
@@ -13,7 +9,7 @@
  COPYRIGHT NOTICE
  __________________
 
- (C) Copyright 2002-2013 - Approach Foundation LLC, Garet Claborn
+ (C) Copyright 2012 - Approach Foundation LLC, Garet Claborn
  All Rights Reserved.
 
  Notice: All information contained herein is, and remains

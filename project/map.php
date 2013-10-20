@@ -3,30 +3,27 @@
 
 require_once( '../../approach/core.php');
 
-$DefaultCategory = 'learn';
-global $ActivePublication;
-global $ActivePublicationContext;
+$DefaultRoot = 9;
+global $ActiveComposition;
+global $ActiveCompositionContext;
 global $ApproachServiceCall;
 
 function RouteFromURL($url, $silent=false)
 {
     global $SiteRoot;
-    global $DefaultCategory;
-    global $ActivePublication;
-    global $ActivePublicationContext;
+    global $DefaultRoot;
+    global $ActiveComposition;
+    global $ActiveCompositionContext;
 
     /* Set up environment */
 
-    $ActivePublication = array();
-    $ActivePublicationContext['path'] = '';
-
-    $found = false;
-    $Category;
-    $Possible;
-    $CategorySearch;
-    $CategoriesSearch;
-    $Publication;
-
+    $ActiveComposition = array();
+    $ActiveCompositionContext['path'] = '';
+    $ActiveCompositionContext['id']= array();
+    $ActiveCompositionContext['type']= array();
+    $ActiveCompositionContext['typeid']= array();
+    
+    $options = array();
 
     if(!isset($url)) $url = $_SERVER['REQUEST_URI'];
     $url = urldecode($url);
@@ -43,121 +40,103 @@ function RouteFromURL($url, $silent=false)
 
     $AppPath = array_values($AppPath);
 
-    
-
-
-
-
-    /*  Home Page   */
+    /* URI has been transformed to an array structure */
+    /*  Root Level Detection  */
     if($url == '/' ||$url == '/home' || $url == '/index' || $url == '/default' )
     {
         $options=array();
         //$options['condition']= '[id] = 1 AND [root] = 1';
         $options['command']= 'SELECT * ';
         
-        $Publication = LoadObject('nodes', $options);
+        $Composition = LoadObject('compositions', $options);
 
-        $ActivePublicationContext['path'] .= 'compose.php';        
-        //$ActivePublicationContext['data'] = $Publication->data;
+        $ActiveCompositionContext['path'] .= 'compose.php';        
+        //$ActiveCompositionContext['data'] = $Composition->data;
 
-        $Active_Publication = new Composition();
+        $Composing = new Composition();
         
-        require_once(__DIR__ . '/'.$ActivePublicationContext['path']);
-        $Active_Publication->publish($silent);
+        require_once(__DIR__ . '/'.$ActiveCompositionContext['path']);
+        $Composing->publish($silent);
         
-        $ActivePublication = $Active_Publication;
-        $ActivePublicationContext['self'] = $ActivePublication;
-        return $Active_Publication;
+        $ActiveComposition = $Composing;
+        $ActiveCompositionContext['self'] = $ActiveComposition;
+        return $Composing;  //Done
     }
 
-    /*  Dynamic Nested Publications */
-    $options = array();
+    /*  Dynamic Nested Compositions */
     
-     /* User Page */
-     if($AppPath[0] == 'users' )
-    {
-        $options['range']= 'TOP 1 *';
-        $options['condition']= ' [account] = \''.$AppPath[1].'\' ';
-        $User = LoadObject('Corporate_Users', $options);
-        $Publication = $User;
-        $ActivePublicationContext['path'] .= 'Users/root.php';
-        $ActivePublicationContext['data'] = $User->data;
-        $ActivePublicationContext['data']['title'] = 'Control Panel - ' . $User->data['primaryfname'] . '\'s Command Console';
+    
+    /*   Get Root Type   */
 
-        $Active_Publication = new Publication();
-        require_once(__DIR__ . '/'.$ActivePublicationContext['path']);
-        $Active_Publication->publish($silent);
-        $ActivePublication = $Active_Publication;
-        $ActivePublicationContext['self'] = $ActivePublication;
-        return $Active_Publication;
+    $options['method']= 'WHERE alias LIKE \'' . $AppPath[0] . '\' AND (parent = 1 OR parent = '.$DefaultRoot.')';
+    $options['condition']= 'ORDER BY self LIMIT 1';
+    
+    $RootSearch = LoadObject('compositions', $options);
+
+    //print_r($RootSearch);
+    if(count($RootSearch) < 1 )
+    {
+        exit("FAILED TO ROUTE Composition: PRIMARY TYPE SEARCH FAILURE. ");
+    }
+    else
+    {
+        $options['method']= 'WHERE id='.$RootSearch->data['scope'];
+        $options['condition']= 'ORDER BY id LIMIT 1';
+        $Type = LoadObject('types', $options);
     }
 
-    /*   Get Root Category   */
-
-    $options['range']= 'TOP 1 *';
-    $options['condition']= '[Name] LIKE \'' . $AppPath[0] . '\' AND Parent = 2';
-    $CategorySearch = LoadObject('Categories', $options);
-
-    if(count($CategorySearch) < 1 )
-    {
-        $options['condition']= '[Name] LIKE "yourmom"  ESCAPE \'\\\' AND Parent = 2 ';
-        $CategorySearch = LoadObject('Categories', $options);
-        if(count($CategorySearch) > 0 ){            $Category = $CategorySearch;     }
-        else{ exit("FAILED TO ROUTE PUBLICATION: PRIMARY CATEGORY SEARCH FAILURE. "); }
-    }   else{ $Category = $CategorySearch;    }
-
-
-
-    $ActivePublicationContext['id'][$Category->data['Name']] = $Category->data['id'];
-    $ActivePublicationContext['path'] .= $Category->data['Name'] . '/';
-
-    $options['condition']= '[alias] LIKE \'' . $AppPath[0] . '\' AND [category] = ' . $Category->data['id'] . ' AND [root] = 1';
-    $Publication = LoadObject('Publications', $options);
-
-    /*  Get Root Publication For Next Category  */
-
+    $ActiveCompositionContext['id'][] = $RootSearch->data['id'];
+    $ActiveCompositionContext['type'][]=$Type->data['Name'];
+    $ActiveCompositionContext['typeid'][]= $Type->data['id'];
+    $ActiveCompositionContext['path'] .=  $Type->data['Name'] . '/';
+    
+    
+    /*  Get Root Composition For Next Type  */
   for($i=1, $L=count($AppPath); $i<$L; $i++)
   {
-      /*    Match Currrent Category Root Publication    */
-      $options['range']= '*';
-      $options['condition']= '[Parent] = ' . $Category->data['id'];
-      $Subcategories = LoadObjects('Categories', $options);
+      /*    Match Currrent Type Root Composition    */
+        $options['method']= 'WHERE alias LIKE \'' . $AppPath[$i] . '\' AND parent = '.$RootSearch->data['id'];
+        $options['condition']= 'ORDER BY self LIMIT 1';
+        
+        $RootSearch = LoadObject('compositions', $options);
 
-      $options['condition']= '[alias] LIKE \'' . $AppPath[$i] . '\' AND ( ';
-      foreach($Subcategories as $subcat)
-      {
-          $options['condition'] =$options['condition'] . ' [category] = ' . $subcat->data['id'] .' OR';
-      }
-      $options['condition'] = substr($options['condition'],0, -3);
-      $options['condition'] = $options['condition'] . ') AND [parent] = '.$Publication->data['id'] ;
-
-      $Publication = LoadObject('Publications', $options);
-
-      $ActivePublicationContext['id'][$Category->data['Name']] = $Category->data['id'];
-      if($Category->data['Name'] != $DefaultCategory) $ActivePublicationContext['path'] .= $Category->data['Name'] . '/';
-
-        /*    Next Category Search    */
-        $options['range']= 'TOP 1 *';
-        $options['condition']= '[id] = \'' . $Publication->data['category'] . '\' AND [Parent] = ' . $Category->data['id'];
-        $Category = LoadObject('Categories', $options);
+        if(count($RootSearch) < 1 )
+        {
+            exit("FAILED TO ROUTE Composition: PRIMARY TYPE SEARCH FAILURE. ");
+        }
+        else
+        {
+            $options['method']= 'WHERE id='.$RootSearch->data['scope'];
+            $options['condition']= 'ORDER BY id LIMIT 1';
+            $Type = LoadObject('types', $options);
+        }
+        
+        $ActiveCompositionContext['id'][] = $RootSearch->data['id'];
+        $ActiveCompositionContext['type'][]=$Type->data['Name'];
+        $ActiveCompositionContext['typeid'][]= $Type->data['id'];
+        $ActiveCompositionContext['traversed'][]=$RootSearch->data;
+        
+        if($RootSearch->data['root']==1) $ActiveCompositionContext['path'] .= $Type->data['Name'] .'/';
+        else $ActiveCompositionContext['path'] .= 'compose.php';
   }
 
-  if(count($AppPath) >1) $ActivePublicationContext['path'] .= $Category->data['Name'] . '/';
-  $ActivePublicationContext['data'] = $Publication->data;
-  $ActivePublicationContext['path'] .= 'root.php';
+  $ActiveCompositionContext['apppath'] = $AppPath;
+  $ActiveCompositionContext['data'] = $RootSearch->data;
+  if($RootSearch->data['root']==1 || count($AppPath) ==1) $ActiveCompositionContext['path'] .= 'compose.php';
 
-  $Active_Publication = new Publication();
-  require_once(__DIR__ . '/'.$ActivePublicationContext['path']);
-  $Active_Publication->publish($silent);
+  $Composing = new Composition();
+  $ActiveCompositionContext['self'] = $RootSearch;
+  require_once(__DIR__ . '/'.$ActiveCompositionContext['path']);
+  $Composing->publish($silent);
 
-  $ActivePublication = $Active_Publication;
-  $ActivePublicationContext['self'] = $ActivePublication;
-  return $Active_Publication;
+  $ActiveComposition = $Composing;
+  $ActiveCompositionContext['self'] = $ActiveComposition;
+  return $Composing;
 
- // $RoutedPublication = new Publication();
+ // $RoutedComposition = new Composition();
 }
 
 
-if(!$ApproachServiceCall){  $ActivePublication = RouteFromURL($_SERVER['REQUEST_URI']);  }
+if(!$ApproachServiceCall){  $ActiveComposition = RouteFromURL($_SERVER['REQUEST_URI']);  }
 
 ?>
