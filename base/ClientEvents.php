@@ -29,7 +29,8 @@ $RegisteredScripts->attributes['type']="text/javascript";
 
 function RegisterScript($inboundScript, $toHead=true, $comment='')
 {
-    if($comment != ''){ $comment = "\r\n/* $comment */\r\n"; }
+    if($inboundScript=='') return false;
+    if($comment != ''){ $comment = "\r\n/* $comment ".var_dump(debug_backtrace(),true)."*/\r\n"; }
     global $RegisteredScripts;
 
     $Head;

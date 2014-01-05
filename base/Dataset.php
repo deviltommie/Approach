@@ -35,14 +35,17 @@ Request For Comments:
  
 */
 
+global $RuntimePath;
+global $db;
 
-require_once('/../__config_error.php');
-require_once('/../__config_database.php');
+//require_once('/../__config_error.php');
+//require_once('/../__config_database.php');
 
-$tableName="NULL TABLE";
+if(!isset($db)) die('No database selected');
+if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';	//Included from core.php?
+
+$tableName='NULL TABLE';
 $currentTable;
-
-if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';
 
 function fileSave($file, $data)
 {
@@ -57,38 +60,65 @@ function SavePHP($dbo)
     /*
      *	To Do: Move Variables into a public static Dataset::profile map
      */
-  $theOutput = "<? \nclass " . $dbo->table . " extends Dataset { \n";
+  $theOutput = "<?php \nclass " . $dbo->table . " extends Dataset { \n";
   $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
 
   $theOutput .= ";\n\tpublic \$table='$dbo->table';";
 
   if( isset($dbo->PrimaryKey) ) $theOutput .= "\n\tpublic \$PrimaryKey='$dbo->PrimaryKey';";
   else $theOutput .= "\n\tpublic \$PrimaryKey='+++PARENT+++';";
+  
+  if( isset($dbo->ForeignKey) ) $theOutput .= "\n\tpublic \$ForeignKey='".var_export($dbo->ForeignKey,true).'\';';
 
   $theOutput .= "\n\tpublic \$data;";
   $theOutput .= "\n}\n?>";
 
-//  print_r($theOutput);	$RuntimePath . 'Datasets/' 
-  fileSave($RuntimePath . "Datasets/" . $dbo->table . '.php', $theOutput);
+//  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
+  fileSave($RuntimePath . "support/datasets/" . $dbo->table . '.php', $theOutput);
 }
 
-function ms_escape_string($data) {
-        if ( !isset($data) or empty($data) ) return '';
-        if ( is_numeric($data) ) return $data;
+function RevisingSavePHP($dbo)
+{
+  global $RuntimePath;
+    /*
+     *	To Do: Move Variables into a public static Dataset::profile map
+     */
+    
+  $LinePrefix="\n\t";
+  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset { '.PHP_EOL;
+  $theOutput .= $LinePrefix.'public static $profile[\'header\']=' . var_export($dbo->Columns, true).';';
 
-        $non_displayables = array(
-            '/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
-            '/%1[0-9a-f]/',             // url encoded 16-31
-            '/[\x00-\x08]/',            // 00-08
-            '/\x0b/',                   // 11
-            '/\x0c/',                   // 12
-            '/[\x0e-\x1f]/'             // 14-31
-        );
-        foreach ( $non_displayables as $regex )
-            $data = preg_replace( $regex, '', $data );
-        $data = str_replace("'", "''", $data );
-        return $data;
-    }
+  $theOutput .= $LinePrefix.'public static $profile[\'target\']=\''.$dbo->table.'\';';
+
+  if( count($dbo->ForeignKey) > 0 ) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'ForeignKey\']='.var_export($dbo->ForeignKey,true).';';
+  if( isset($dbo->PrimaryKey)) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'Primary\']=\'<Accessor="Inherited" />\';';
+
+  $theOutput .= $LinePrefix.'public $data;';
+  $theOutput .= PHP_EOL.'}'.PHP_EOL.'?>';
+
+//  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
+  fileSave($RuntimePath . 'support/datasets/' . $dbo->table . '.php', $theOutput);
+}
+
+
+function ms_escape_string($data)
+{
+    if ( !isset($data) or empty($data) ) return '';
+    if ( is_numeric($data) ) return $data;
+    
+    $non_displayables = array(
+	'/%0[0-8bcef]/',            // url encoded 00-08, 11, 12, 14, 15
+	'/%1[0-9a-f]/',             // url encoded 16-31
+	'/[\x00-\x08]/',            // 00-08
+	'/\x0b/',                   // 11
+	'/\x0c/',                   // 12
+	'/[\x0e-\x1f]/'             // 14-31
+    );
+    foreach ( $non_displayables as $regex )
+	$data = preg_replace( $regex, '', $data );
+    $data = str_replace("'", "''", $data );
+    return $data;
+}
 
 
 function LoadDirect($query)
@@ -131,6 +161,7 @@ function UpdateSchema()
         else
             $dObj->ForeignKey[]=$row->data['CONSTRAINT_NAME'];
     }
+    $dObj->PrimaryKey='id';
 
     $t=array();
     foreach($keyProperties as $View)
@@ -154,13 +185,14 @@ function UpdateSchema()
 
 class Dataset
 {
-    public $table, $key, $options, $data;
+    public $table, $key, $options, $data,$PrimaryKey;
 
     function Dataset($t, $options=array())
     {
         global $tableName;
         global $currentTable;
         global $db;
+	
         
         $this->table = get_class($this);
 
@@ -202,7 +234,7 @@ class Dataset
         $buildQuery = $command .' '. $range .' FROM '. $target .' '. $method .' '. $condition;
         if($queryoverride != 'NULL') $buildQuery = $queryoverride;
         $options['queryoverride']=$buildQuery;
-        if(isset($options['debug'])) print_r('\n\r<br>\n\r'.$buildQuery.'\n\r<br>\n\r');
+        if(isset($options['debug'])) print_r('<br>'.PHP_EOL.$buildQuery.PHP_EOL.'<br>');
         if($tableName!=$t) //Already on the right table? Don't restart the query! D:
         {
             $currentTable=$db->query($buildQuery);
@@ -235,12 +267,13 @@ class Dataset
     function save($primaryValue=NULL)  //call this function after using the new update() function. it will save changes on the php object to database.
     {
         global $RuntimePath;
+	global $db;
 	
-        if($this->PrimaryKey == '+++PARENT+++')
+        if($this->PrimaryKey == '<Accessor="Inherited" />')
         {
             foreach($this->Columns as $tableName => $table)
             {
-                require_once($RuntimePath . 'Datasets/' . $tableName . '.php');
+                require_once($RuntimePath . 'support/datasets/' . $tableName . '.php');
                 $AbstractedOrigin = new $tableName($tableName);
                 foreach($table as $Column => $Properties)
                 {
@@ -253,39 +286,34 @@ class Dataset
         else
         {
           $valuePairs ='';
-          $insertCols ='';
-          $insertVals ='';
+          $SerializedProperties ='';
+          $SerializedValues ='';
 
           if(isset($primaryValue)) $this->data[$this->PrimaryKey] = $primaryValue;
           foreach($this->data as $key => $value)
           {
               if($key != $this->PrimaryKey && $value != '' && isset($value) )
               {
-                  $valuePairs .= ' '. $key .' = ';
-                  $valuePairs .= (is_string($value) ? "'" . ms_escape_string($value) . "', " : $value.', ');
-
-                  $insertCols .= ' '. $key .', ';
-                  $insertVals .= (is_string($value) ? "'" . ms_escape_string($value) . "', " : $value.', ');
+		  $val=(is_string($value) ? '\'' . ms_escape_string($value) . '\', ' : $value.', ');
+    
+		  $valuePairs .= ' '. $key .' = '.$val;
+                  $SerializedProperties .= $key .', ';
+                  $SerializedValues .= $val;
               }
           }
           $valuePairs=substr($valuePairs, 0, -2);
-          $insertCols=substr($insertCols, 0, -2);
-          $insertVals=substr($insertVals, 0, -2);
+          $SerializedProperties=substr($SerializedProperties, 0, -2);
+          $SerializedValues=substr($SerializedValues, 0, -2);
 
-          if( isset($primaryValue) )
-          {
-            $data = mysql_query(
-            'IF( EXISTS( SELECT * FROM '.$this->table.' WHERE ' . $this->PrimaryKey . ' = ' . $this->data[$this->PrimaryKey] .' ) )
-                    BEGIN UPDATE '. $this->table . ' SET ' . $valuePairs . ' WHERE ' . $this->PrimaryKey . ' = ' . $this->data[$this->PrimaryKey] .' END
-             ELSE   BEGIN INSERT INTO '. $this->table . ' ( ' . $this->PrimaryKey .' '. $insertCols . ') VALUES (' . $primaryValue . ', '. $insertVals . ') END; SELECT SCOPE_IDENTITY()'
-            );
-          }
-          else{ $result = mysql_query('BEGIN INSERT INTO '. $this->table . ' ( ' . $insertCols . ') VALUES ( ' . $insertVals . ') END; SELECT SCOPE_IDENTITY()' ); }
-         $data=mysql_fetch_array($result);
-
-        }
-
-        return $data;
+          $result = mysqli_query($db,'INSERT INTO '. $this->table . ' ( ' . $SerializedProperties . ') VALUES( ' . $SerializedValues . ') ON DUPLICATE KEY UPDATE '. $valuePairs. ';' );
+	  if($result) $this->data[$this->PrimaryKey]=mysqli_insert_id($db);
+	}
+/*	print_r('<pre>'.
+		'INSERT INTO '. $this->table . ' ( ' . $SerializedProperties . ') VALUES( ' . $SerializedValues . ') ON DUPLICATE KEY UPDATE '. $valuePairs. ';' 
+		.'</pre><hr>'.mysqli_error($db).'<hr>');
+        */
+	
+        return $this->data;
     }
     function toPHP()
     {
@@ -297,7 +325,7 @@ class Dataset
         }
         $theOutput .= "\n}\n?>";
 
-        fileSave($RuntimePath . 'Datasets/' . $this->table . '.php', $theOutput);
+        fileSave($RuntimePath . 'support/datasets/' . $this->table . '.php', $theOutput);
     }
 
 }
@@ -319,13 +347,14 @@ function LoadObjects($table, $options=Array())
 
     try
     {
-        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw new ErrorException("Data missing");
+        if(!include_once $RuntimePath . 'support/datasets/' . $table . '.php') throw new ErrorException("Data missing");
         else $currentRow = new $table($table, $options);
     }
     catch(ErrorException $e)
     {
-        UpdateSchema();
-        require_once $RuntimePath . 'Datasets/' . $table . '.php';
+        exit("SCHEMA FAIL");
+	UpdateSchema();
+        require_once $RuntimePath . 'support/datasets/' . $table . '.php';
     }
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D
@@ -353,13 +382,14 @@ function LoadObject($table, $options=Array())
     //Look For Generated DataBase Object File, If Not There Try To Make One
     try
     {
-        if(!include_once $RuntimePath . 'Datasets/' . $table . '.php') throw $DatasetMissing;
+        if(!include_once $RuntimePath . 'support/datasets/' . $table . '.php') throw $DatasetMissing;
         $currentRow = new $table($table, $options);
     }
     catch(ErrorException $e)
     {
+	exit("SCHEMA FAIL");
         UpdateSchema();
-        require_once $RuntimePath . 'Datasets/' . $table . '.php';
+        require_once $RuntimePath . 'support/datasets/' . $table . '.php';
     }
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D

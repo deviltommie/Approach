@@ -38,11 +38,11 @@
 
 
 
-require_once('/../base/Render.php');
-require_once('/../base/Utility.php');
-require_once('/../base/ClientEvents.php');
-require_once('/../base/Smart.php');
-require_once('/../base/Dataset.php');
+require_once(__DIR__ . '/../base/Render.php');
+require_once(__DIR__ . '/../base/Utility.php');
+require_once(__DIR__ . '/../base/ClientEvents.php');
+require_once(__DIR__ . '/../base/Smart.php');
+require_once(__DIR__ . '/../base/Dataset.php');
 
 class Component
 {
@@ -97,15 +97,14 @@ class Component
 
         //Default Values
         $RenderType         = 'Smart';
-        $ChildTag           = 'div';
-        $ContainerClasses   = Array(get_class($this));
-        $ChildClasses       = Array(get_class($this).'Child');
+        $ChildTag           = 'li';
+        $ContainerClasses   = Array(get_class($this).'Container');
+        $ChildClasses       = Array(get_class($this));
         
         //This is annoying, there's a better way to initialy cast to associative array, right?
         $ChildAttributes    = Array('nullattr'=>'');    unset($ChildAttributes['nullattr']);
         $Items              = Array();
         $BuildData          = Array();
-        $ParentContainer    = GetRenderable($root,$this->context['render']);
         $Scripts            = '';
         $this->ScriptPlacement = true;
 
@@ -113,11 +112,14 @@ class Component
         if(isset($this->RenderType))        $RenderType         =$this->RenderType;
         if(isset($this->ChildTag))          $ChildTag           =$this->ChildTag;
         if(isset($this->ContainerClasses))  $ContainerClasses   =$this->ContainerClasses;
+        if(isset($this->ParentContainer))   $ParentContainer    =$this->ParentContainer;
         if(isset($this->ChildClasses))      $ChildClasses       =$this->ChildClasses;
         if(isset($this->ChildAttributes))   $ChildAttributes    =$this->ChildAttributes;
         if(isset($this->Items))             $Items              =$this->Items;
         if(isset($this->Scripts))           $Scripts            =$this->Scripts;
         if(isset($this->ScriptPlacement))   $ScriptPlacement    =$this->ScriptPlacement;
+
+        if(!isset($ParentContainer))        $ParentContainer    = GetRenderable($root,$this->context['render']);
 
         //Optional Overrides
         if(is_array($options))
@@ -143,7 +145,6 @@ class Component
         /* ---------------------------------*/
         /*  BEGIN ARRAY ALIGNMENT           */
 
-
         foreach($this->context['data'] as $table)
         {
           $Items = LoadObjects($table,$options[$table]);
@@ -163,11 +164,10 @@ class Component
               $i++;
           }
       }
-
       $Children=array();
-      $SmartObject = new $RenderType($ChildTag[0],array('template_path' => $this->context['template'], 'markup' => 0) );
+      $SmartObject = new $RenderType(array('tag'=>$ChildTag[0],'template' => $this->context['template'], 'markup' => 0) );
       $TemplateCount=count($SmartObject->markup);
-      RegisterScript($Scripts, $ScriptPlacement, $RenderType . ' ' . get_class($this));
+      if($Scripts != '')    RegisterScript($Scripts, $ScriptPlacement, $RenderType . ' ' . get_class($this));
 
       $TChildClasses = $ChildClasses;
       $ChildClasses = array();
@@ -203,7 +203,7 @@ class Component
         foreach($BuildData as $ConsolidatedRow)
         {
           //Send Data From Database To Rendering Engine
-          $SmartObject = new $RenderType($ChildTag[$i],array('template_path' => $this->context['template'], 'markup' => $i) );
+          $SmartObject = new $RenderType(array('tag'=>$ChildTag[$i],'template' => $this->context['template'], 'markupindex' => $i) );
           $SmartObject->tokens['__self_index']=$c;
 
           (isset($SmartObject->data[get_class($this)])) ? $SmartObject->data[get_class($this)]=array_merge($SmartObject->data[get_class($this)], $ConsolidatedRow) : $SmartObject->data[get_class($this)]=$ConsolidatedRow;
@@ -215,7 +215,6 @@ class Component
           $c++;
         }
       }
-
         $this->HandleScripts($ParentContainer);
 
         $SmartObject->Tokenize();
@@ -226,7 +225,9 @@ class Component
       $this->PostProcess($BuildData, $ParentContainer);
     }
 
-    function PreProcess($BuildData, $ParentContainer){ /* $ParentContainer->children[]= $t=new renderable('div'); $t->content=var_export($BuildData, true); */ }
+    function PreProcess($BuildData, $ParentContainer){
+       // /* $ParentContainer->children[]= $t=new renderable('div'); $t->content=var_export($BuildData, true); */
+        }
     function PostProcess($BuildData, $ParentContainer){}
 
     function Save($IncomingTokens, $TemplateBinding)
@@ -296,6 +297,17 @@ class Component
       return 'CLEAR';
     }
 }
+
+class AppCard extends Component
+{
+    public $RenderType = 'Smart';
+    public $ChildTag = 'ul';
+    public $ChildClasses=array('round','AppCard');
+
+    public $ContainerClasses = array('HorizontalList');
+}
+
+
 
 class Massive extends Component
 {

@@ -18,47 +18,60 @@
     limitations under the License.
 */
 
-require_once('Render.php');
-require_once('Utility.php');
+require_once(__DIR__.'/Render.php');
+require_once(__DIR__.'/Utility.php');
+$Defaults['Renderable']='div';
 
 class Smart extends renderable
 {
     public  $data;
-    public  $markup=null;
+    public  $markup=array();
+    public  $template=null;
     public  $context=Array();
     public  $tokens=Array();
     public  $TemplateBinding;
     public  $Scripts;
     public  $options=array();
 
-    function Smart($t,$options)
+    function Smart($options)
     {
-        $this->markup = GetFile($options['template_path']);
+	global $Defaults;
+	global $renderObjectIndex;
+        
+        if(isset($options['template'])) $this->template = GetFile($options['template']) ;
+        if(isset($options['binding'])) $this->binding = GetFile($options['binding']);
 
         $this->options = $options;
-        global $renderObjectIndex;
         $this->id=$renderObjectIndex;
         $renderObjectIndex++;                /*    Register New Renderable    */
-        if(!isset($t)){ $t='div'; }
-        $this->tag = $t;
+        $options['tag']=$options['tag'];
+	
+	if(!isset($options['tag']) ){ $options['tag']=$Defaults['Renderable']; }
+        $this->tag = $options['tag'];
         $this->pageID = (isset($options['PageID']) ) ? $options['PageID'] : get_class($this) . $this->id;
         if(isset($options['classes']) )
         {
             $this->classes = $options['classes'];
         }
 
-        if(isset($this->markup) && $this->markup != null)
+	$this->ResolveTemplate();
+        $this->BindContext();
+    }
+    
+    public function ResolveTemplate()
+    {
+	if(isset($this->template) && $this->template != null)
         {
-            $dataSet=simplexml_load_string($this->markup);
+            $dataSet=simplexml_load_string($this->template);
 
-            $templateHeaders=$dataSet->xpath('//Component:*');
+            $TemplateBindings=$dataSet->xpath('//Component:*');	    
             $markupHeaders=$dataSet->xpath('//Render:*');
 
-            foreach($templateHeaders as $template)
+            foreach($TemplateBindings as $binding)
             {
-               $this->TemplateBinding[$template->getName()] = json_decode((string)$template,true);
+               $this->TemplateBinding[$binding->getName()] = json_decode((string)$binding,true);
             }
-            unset($templateHeaders);
+            unset($TemplateBindings);
 
 	    $markup=array();
 
@@ -67,16 +80,8 @@ class Smart extends renderable
 		//To Do: Bring Optimized XML Parser To Utility.
 		$markup[]=strrev( explode('<',	strrev( explode('>',$mark->asXML(),2)[1]	),2)[1] );
 	    }
-           /*
-            $dataSet = explode("•••••••••••••••••••••",$this->markup);  //really this old method was very fast, but non-standard
-            $tokens=Array();
-            $this->TemplateBinding = json_decode($dataSet[0], true);
-            array_shift($dataSet); $this->markup = $dataSet;
-           */
-            $this->markup = $markup;
+            $this->markup = array_merge($this->markup,$markup);
         }
-
-        $this->BindContext();
     }
 
     public function BindContext()
@@ -134,7 +139,7 @@ class Smart extends renderable
             $context['render']=$this->id;
             $context['data']=$TablesHolder;
             $context['options']=$this->options[$ActiveComponent];
-            $context['template']=$this->options['template_path'];
+            $context['template']=$this->options['template'];
 
             $this->context[$ActiveComponent]=$context;
           }
