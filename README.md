@@ -1,5 +1,4 @@
-##Go to http://approach.im while we climb to release. Forums, blogs, tutorials and help is building up there. 
-###This is an interim site until the vanilla Approach cloud OS (this aint no web app!) is launched at approachfoundation.org 
+
 
 Approach
 =============
