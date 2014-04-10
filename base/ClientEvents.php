@@ -26,6 +26,19 @@ $RegisteredScripts = new renderable('script');
 $RegisteredScripts->attributes['type']="text/javascript";
 
 
+function GetChildScripts(&$root)
+{
+  $Container=Array();
+  if(isset($root->children))
+  foreach($root->children as $child)   //Get Script Type Renderables In Head
+  {
+      if($child->tag == 'script')
+      {
+          $Container[]=$child;
+      }
+  }
+  return $Container;
+}
 
 function RegisterScript($inboundScript, $toHead=true, $comment='')
 {
@@ -39,9 +52,9 @@ function RegisterScript($inboundScript, $toHead=true, $comment='')
 
     if($toHead)  //Aggregate all dynamic scripts to last script renderable in head
     {
-        $Head=GetHeadFromDOM();
-        $HeadScripts = GetChildScripts($Head);
-        $NumScriptsInHead = count($HeadScripts);
+        $Head=&GetHeadFromDOM();
+        $HeadScripts=& GetChildScripts($Head);
+        $NumScriptsInHead= count($HeadScripts);
 
         if($NumScriptsInHead > 0 && isset($HeadScripts[$NumScriptsInHead]))
         {

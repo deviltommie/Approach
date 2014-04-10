@@ -28,19 +28,15 @@ IF YOU NEED PRODUCTION USAGE, USE MSSQL OR THOUROUGHLY TEST MYSQLI VERSION FOR N
 MONGODB, REDIS and XML FILE CONNECTORS ON THE WAY - DESIGNING CONNECTOR ARCHITECTURE CURRENTLY
 
 Request For Comments:
-1. 	The Generator needs to understand connectors somehow, very cleanly.
-2. 	Before or after moving data into the profile property, the concept of PrimaryKey/Foreign Keys
-	needs to be made generic
-3. 	How can we make the search functionality stronger, easier to batch, more intuitive and/or more generic?
+1. 	How can we make the search functionality stronger, easier to batch, more intuitive and/or more generic?
  
 */
-
-global $RuntimePath;
-global $db;
 
 //require_once('/../__config_error.php');
 //require_once('/../__config_database.php');
 
+global $db;
+global $RuntimePath;
 if(!isset($db)) die('No database selected');
 if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';	//Included from core.php?
 
@@ -54,50 +50,51 @@ function fileSave($file, $data)
     fclose($handle);
 }
 
-function SavePHP($dbo)
+function SavePHP($dbo,$classpath='')
 {
   global $RuntimePath;
     /*
      *	To Do: Move Variables into a public static Dataset::profile map
      */
-  $theOutput = "<?php \nclass " . $dbo->table . " extends Dataset { \n";
-  $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
+  $RefersExist=isset($dbo->ForeignKey);
 
-  $theOutput .= ";\n\tpublic \$table='$dbo->table';";
-
-  if( isset($dbo->PrimaryKey) ) $theOutput .= "\n\tpublic \$PrimaryKey='$dbo->PrimaryKey';";
-  else $theOutput .= "\n\tpublic \$PrimaryKey='+++PARENT+++';";
-  
-  if( isset($dbo->ForeignKey) ) $theOutput .= "\n\tpublic \$ForeignKey='".var_export($dbo->ForeignKey,true).'\';';
-
-  $theOutput .= "\n\tpublic \$data;";
-  $theOutput .= "\n}\n?>";
-
-//  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
-  fileSave($RuntimePath . "support/datasets/" . $dbo->table . '.php', $theOutput);
-}
-
-function RevisingSavePHP($dbo)
-{
-  global $RuntimePath;
-    /*
-     *	To Do: Move Variables into a public static Dataset::profile map
-     */
-    
   $LinePrefix="\n\t";
-  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset { '.PHP_EOL;
-  $theOutput .= $LinePrefix.'public static $profile[\'header\']=' . var_export($dbo->Columns, true).';';
+  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset'.PHP_EOL.'{';
 
-  $theOutput .= $LinePrefix.'public static $profile[\'target\']=\''.$dbo->table.'\';';
+  //TO DO: In C++ this would be public static const, but in PHP we will need to make it protected
+  //First will need to make read-only accessor/get function in Dataset and ensure other classes are using it
+  
+  $theOutput .= $LinePrefix.'public static $profile= array(' ;
+  $theOutput .= $LinePrefix."\t'target' =>'".$dbo->table.'\',';
+  if( isset($dbo->PrimaryKey))
+  {
+	$theOutput .= $LinePrefix."\t'Accessor'=>array( ".($RefersExist?$LinePrefix."\t\t'":'').'\'Primary\' => \''.$dbo->PrimaryKey.'\'';
+	if($RefersExist)
+		$theOutput .= ','.$LinePrefix."\t\t'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\')';
+	$theOutput .= '),';
+  }
+  elseif($RefersExist)
+	$theOutput .= $LinePrefix."\t'Accessor'=>array( 'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\'),';
 
-  if( count($dbo->ForeignKey) > 0 ) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'ForeignKey\']='.var_export($dbo->ForeignKey,true).';';
-  if( isset($dbo->PrimaryKey)) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'Primary\']=\'<Accessor="Inherited" />\';';
+  $theOutput .= $LinePrefix."\t'header'=>array( ";
+  foreach($dbo->Columns as $col => $aspect)
+  {
+	$theOutput.=$LinePrefix."\t\t'".$col.'\' => array( ';
+	foreach($aspect as $k => $v)
+	{
+		$theOutput.=' \''.$k.'\' => \''.str_replace('\'','\\\'',$v).'\',';
+	}
+	rtrim($theOutput,',');
+	$theOutput.='),';
+  }
+  rtrim($theOutput,',');
+  $theOutput.=$LinePrefix."\t".')'.$LinePrefix.');';
 
   $theOutput .= $LinePrefix.'public $data;';
   $theOutput .= PHP_EOL.'}'.PHP_EOL.'?>';
 
 //  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
-  fileSave($RuntimePath . 'support/datasets/' . $dbo->table . '.php', $theOutput);
+  fileSave($RuntimePath . 'support/datasets/' .$classpath.'/'. $dbo->table . '.php', $theOutput);
 }
 
 
@@ -132,6 +129,9 @@ function LoadDirect($query)
 
 function UpdateSchema()
 {
+  //need switch() case: for database type [MySQL, MSSQL, Mongo, Redis, Parsyph, Hadoop, Cassandra]
+  $InfoSchemaDatabaseColumn='TABLE_SCHEMA';
+	
   $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS';
 
   $spread=array();
@@ -177,11 +177,18 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-    SavePHP($dObj);
+	$classpath='';
+	foreach($spread[$table] as $column )
+	{
+		$classpath=(strtolower($column[$InfoSchemaDatabaseColumn])=='information_schema') ? 'schema':'';
+		break;
+	}
+
+    SavePHP($dObj,  $classpath);
   }
 }
 
-//UpdateSchema();
+UpdateSchema();
 
 class Dataset
 {
@@ -201,8 +208,8 @@ class Dataset
         /* Default to selecting top 10 rows of the database */
         /* To Do: Default to all if !$ApproachDebugMode ? */
 
-        $command='SELECT * ';
-        $range='';
+        $command='SELECT ';
+        $range='* ';
         $target= isset($t)? $t : get_class($this);
         $method='';
         $condition='';
@@ -352,9 +359,13 @@ function LoadObjects($table, $options=Array())
     }
     catch(ErrorException $e)
     {
-        exit("SCHEMA FAIL");
-	UpdateSchema();
-        require_once $RuntimePath . 'support/datasets/' . $table . '.php';
+	try
+	{
+	    UpdateSchema();
+	    if(!include_once $RuntimePath . 'support/datasets/' . $table . '.php') throw new ErrorException("Data missing");
+	    else $currentRow = new $table($table, $options);
+	}
+	catch(ErrorException $e){ exit("SCHEMA FAIL");	}
     }
 
     //Get That Data !! This Where 3/5 The Magic Happens! =D

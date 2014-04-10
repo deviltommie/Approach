@@ -49,11 +49,12 @@ class Component
     public $context = array();
     public $UpdateInstance=array();
 
-    function CreateContext($render,$data, $template)
+    function CreateContext(&$root, $render,$data, $template)
     {
-       $this->context['render']    = $render;
-       $this->context['data']    = $data;
-       $this->context['template'] = $template;
+       $this->context['root']       = $root;
+       $this->context['render']     = $render;
+       $this->context['data']       = $data;
+       $this->context['template']   = $template;
     }
     function edit()
     {
@@ -87,19 +88,15 @@ class Component
         /* -----------------------------------------*/
         /*  BEGIN FETCHING OPTIONAL APPROACH VALUES */
 
-        global $ActiveComposition;
-        global $APPROACH_DOM_ROOT;
         global $APPROACH_SAVE_FLAG;
-
-        $root;
-        if(isset($ActiveComposition))    $root = $ActiveComposition->DOM;
-        else{                            global $$APPROACH_DOM_ROOT;       $root = $$APPROACH_DOM_ROOT;       }
+        $ComponentClass=get_class($this);
 
         //Default Values
+        $ParentContainer;
         $RenderType         = 'Smart';
         $ChildTag           = 'li';
-        $ContainerClasses   = Array(get_class($this).'Container');
-        $ChildClasses       = Array(get_class($this));
+        $ContainerClasses   = Array($ComponentClass.'Container');
+        $ChildClasses       = Array($ComponentClass);
         
         //This is annoying, there's a better way to initialy cast to associative array, right?
         $ChildAttributes    = Array('nullattr'=>'');    unset($ChildAttributes['nullattr']);
@@ -119,7 +116,7 @@ class Component
         if(isset($this->Scripts))           $Scripts            =$this->Scripts;
         if(isset($this->ScriptPlacement))   $ScriptPlacement    =$this->ScriptPlacement;
 
-        if(!isset($ParentContainer))        $ParentContainer    = GetRenderable($root,$this->context['render']);
+        if(!isset($ParentContainer))        $ParentContainer    = GetRenderable($this->context['root'],$this->context['render']);
 
         //Optional Overrides
         if(is_array($options))
@@ -156,18 +153,18 @@ class Component
               {
                 $BuildData[$i][$table][$key] = $value;
               }
-              if( isset($APPROACH_SAVE_FLAG[get_class($this)][$i]) )
-              if( $APPROACH_SAVE_FLAG[get_class($this)][$i] == true )
+              if( isset($APPROACH_SAVE_FLAG[$ComponentClass][$i]) )
+              if( $APPROACH_SAVE_FLAG[$ComponentClass][$i] == true )
               {
                 $this->UpdateInstance[$table] = $item->data;
               }
-              $i++;
+              ++$i;
           }
       }
       $Children=array();
-      $SmartObject = new $RenderType(array('tag'=>$ChildTag[0],'template' => $this->context['template'], 'markup' => 0) );
-      $TemplateCount=count($SmartObject->markup);
-      if($Scripts != '')    RegisterScript($Scripts, $ScriptPlacement, $RenderType . ' ' . get_class($this));
+      
+      $TemplateCount=count($ParentContainer->markup);
+      if($Scripts != '')    RegisterScript($Scripts, $ScriptPlacement, $RenderType . ' ' . $ComponentClass);
 
       $TChildClasses = $ChildClasses;
       $ChildClasses = array();
@@ -179,25 +176,25 @@ class Component
       if( is_array($TChildClasses) )
       {
           if( is_array( reset($TChildClasses) ) )                      $ChildClasses = array_values($TChildClasses);
-          else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){              $ChildClasses[$i]=$TChildClasses;          }}
+          else{ for($i=0, $L=$TemplateCount; $i<$L; ++$i){              $ChildClasses[$i]=$TChildClasses;          }}
       }
-      else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){                  $ChildClasses[$i]=$TChildClasses;      }}
+      else{ for($i=0, $L=$TemplateCount; $i<$L; ++$i){                  $ChildClasses[$i]=$TChildClasses;      }}
 
       if( is_array($TChildAttributes) )
       {    
           if( is_array( reset($TChildAttributes) ) ){                   $ChildAttributes = array_values($TChildAttributes);}
-          else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){              $ChildAttributes[$i]=$TChildAttributes;          }}
+          else{ for($i=0, $L=$TemplateCount; $i<$L; ++$i){              $ChildAttributes[$i]=$TChildAttributes;          }}
       }                                                                                                     //
-      else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){                  $ChildAttributes[$i]=$TChildAttributes;      }}
+      else{ for($i=0, $L=$TemplateCount; $i<$L; ++$i){                  $ChildAttributes[$i]=$TChildAttributes;      }}
 
       if( is_array($TChildTag) )                                       $ChildTag = $TChildTag;
-      else{ for($i=0, $L=$TemplateCount; $i<$L; $i++){                  $ChildTag[$i]=$TChildTag;      }}
+      else{ for($i=0, $L=$TemplateCount; $i<$L; ++$i){                  $ChildTag[$i]=$TChildTag;      }}
 
       /*    END ARRAY ALIGNMENT */
 
 
       $this->PreProcess($BuildData, $ParentContainer);
-      for($i=0, $L=$TemplateCount; $i<$L; $i++)
+      for($i=0, $L=$TemplateCount; $i<$L; ++$i)
       {
         $c=0;
         foreach($BuildData as $ConsolidatedRow)
@@ -206,13 +203,16 @@ class Component
           $SmartObject = new $RenderType(array('tag'=>$ChildTag[$i],'template' => $this->context['template'], 'markupindex' => $i) );
           $SmartObject->tokens['__self_index']=$c;
 
-          (isset($SmartObject->data[get_class($this)])) ? $SmartObject->data[get_class($this)]=array_merge($SmartObject->data[get_class($this)], $ConsolidatedRow) : $SmartObject->data[get_class($this)]=$ConsolidatedRow;
-          $SmartObject->classes = (is_array($SmartObject->classes)) ? array_merge($SmartObject->classes, $ChildClasses[$i]) : $ChildClasses[$i];
-          $SmartObject->attributes =(is_array($SmartObject->attributes)) ? array_merge($SmartObject->attributes, $ChildAttributes[$i]) : $ChildAttributes[$i];
+          $SmartObject->data[$ComponentClass] = (isset($SmartObject->data[$ComponentClass])) ?
+            array_merge($SmartObject->data[$ComponentClass], $ConsolidatedRow) : $SmartObject->data[$ComponentClass]=$ConsolidatedRow;
+          $SmartObject->classes = (is_array($SmartObject->classes)) ?
+            array_merge($SmartObject->classes, $ChildClasses[$i]) : $ChildClasses[$i];
+          $SmartObject->attributes =(is_array($SmartObject->attributes)) ?
+            array_merge($SmartObject->attributes, $ChildAttributes[$i]) : $ChildAttributes[$i];
 
           $Children[]=$SmartObject;
           $this->HandleChildScripts($SmartObject);
-          $c++;
+          ++$c;
         }
       }
         $this->HandleScripts($ParentContainer);
@@ -223,6 +223,7 @@ class Component
       $ParentContainer->classes = array_merge($ParentContainer->classes, $ContainerClasses);
 
       $this->PostProcess($BuildData, $ParentContainer);
+//      echo $ParentContainer->render();
     }
 
     function PreProcess($BuildData, $ParentContainer){
@@ -361,16 +362,16 @@ class Player extends Component
         {
             $this->ChildTag = array( 'video' , 'ul');
             $this->ChildAttributes = array
-                             (
-                                  'VideoMarkup' =>array
-                                  (
-                                        'width'=>'640',
-                                        'height'=>'480',
-                                        'align'=>'middle'
+            (
+                 'VideoMarkup' =>array
+                 (
+                       'width'=>'640',
+                       'height'=>'480',
+                       'align'=>'middle'
 
-                                  ),
-                                  'ControlMarkup' => array()
-                             );
+                 ),
+                 'ControlMarkup' => array()
+            );
         }
         else
         {
@@ -443,10 +444,21 @@ class HomeDisplay extends Component
 
 }
 
-
 class mRSS_Item extends Component
 {
      public $ChildTag='item';
 }
+
+class MediaList extends Component
+{
+    public $ChildTag='ul';
+    public $RenderType = 'Smart';
+//    public $ChildClasses = array('nav','nav-pills', 'nav-stacked');
+
+    public $ContainerClasses = array('MediaList', 'media-list');
+//    public $ScriptPlacement = true;
+
+}
+
 
 ?>

@@ -23,17 +23,7 @@
 
 require_once('Render.php');
 
-$html = new renderable('html');
-$html->tag='html';
-$APPROACH_DOM_ROOT = 'html';    //Create better mechanism.
-
-
 /*
-$rss = new renderable('rss');
-$rss->tag='rss';
-
-
-
 
 These functions let you primarily search through types of class renderable by
 common CSS selectors such as ID, Class, Attribute and Tag. 
@@ -61,35 +51,53 @@ $MultiElements=function GetRenderablesByTag($root, 'div');
 */
 
 
-function filter( $tag, $content, $styles, $properties)
+function filterXML( $tag, $content, $styles, $properties)
 {
-    $output="<" . $tag;
+    $output='<' . $tag;
     foreach($this->$properties as $property => $value)
     {
-        $output .= " $property=\"$value\"";
+        $output .= ' '.$property.'="'.$value.'"';
     }
-    $output .= " class=\"";
+    $output .= ' class="';
     foreach($this->$styles as $class)
     {
-        $output .= $class. " ";
+        $output .= $class.' ';
     }
-    $output .= "\" id=\"$tag\"" . $this->$id . '">';
-    $output .=$content . "</$tag>";
+    $output .= '"'. 'id="'.$tag . $this->$id . '">';
+    $output .=$content . '</'.$tag.'>';
 }
+
+function toFile($filename, $data)
+{
+    $fh = fopen($filename, 'w') or die('cant open that file');
+    fwrite($fh, $data);
+    fclose($fh);
+}
+
+
+function GetFile($path, $override=false)
+{
+    //return file_get_contents($path);
+    global $APPROACH_REGISTERED_FILES;
+    if(!isset($APPROACH_REGISTERED_FILES[$path]) || $override) $APPROACH_REGISTERED_FILES[$path] = file_get_contents($path);
+    return $APPROACH_REGISTERED_FILES[$path];
+
+}    //Local Scope File Caching
+
 
 
 
 
 
 //function _($root, $search){    return RenderSearch($root, $search); }
-function RenderSearch($root, $search)
+function RenderSearch(&$root, $search)
 {
     $scope = $search[0];
     $search = substr($search, 1);
     $renderObject;
     switch($scope)
     {
-        case '$': $renderObject=GetRenderable($root, $search); break;
+        case '@': $renderObject=GetRenderable($root, $search); break;
         case '#': $renderObject=GetRenderableByPageID($root, $search); break;
         case '.': $renderObject=GetRenderablesByClass($root, $search); break;
         default:  $renderObject=GetRenderableByTag($root, $search); break;
@@ -98,7 +106,7 @@ function RenderSearch($root, $search)
     return $renderObject;
 }
 
-function GetRenderable($SearchRoot, $SearchID)
+function GetRenderable(&$SearchRoot, $SearchID)
 {
     if($SearchRoot->id == $SearchID) return $SearchRoot;
 
@@ -114,7 +122,7 @@ function GetRenderable($SearchRoot, $SearchID)
 
 
 
-function GetRenderablesByTag($root, $tag)
+function GetRenderablesByTag(&$root, $tag)
 {
     $Store=Array();
 
@@ -132,7 +140,7 @@ function GetRenderablesByTag($root, $tag)
     return $Store;
 }
 
-function GetRenderablesByClass($root, $class)
+function GetRenderablesByClass(&$root, $class)
 {
     $Store = array();
 
@@ -154,7 +162,7 @@ function GetRenderablesByClass($root, $class)
     return $Store;
 }
 
-function GetRenderableByPageID($root,$PageID)
+function GetRenderableByPageID(&$root,$PageID)
 {
     $Store = new renderable('div');
     $Store->pageID = 'DEFAULT_ID___ELEMENT_NOT_FOUND';
@@ -174,35 +182,6 @@ function GetRenderableByPageID($root,$PageID)
     return $Store;
 }
 
-
-
-function GetHeadFromDOM()
-{
-  global $APPROACH_DOM_ROOT;
-  global $$APPROACH_DOM_ROOT;
-
-  foreach($$APPROACH_DOM_ROOT->children as $child)   //Get Head
-  {
-      if($child->tag == 'head')
-      {
-          return $child;
-      }
-  }
-}
-
-function GetBodyFromDOM()
-{
-  global $APPROACH_DOM_ROOT;
-  global $$APPROACH_DOM_ROOT;
-
-  foreach($$APPROACH_DOM_ROOT->children as $child)   //Get Body
-  {
-      if($child->tag == 'body')
-      {
-          return $child;
-      }
-  }
-}
 
 $ApproachDebugConsole = new renderable('div', 'ApproachDebugConsole');
 $ApproachDebugMode = false;

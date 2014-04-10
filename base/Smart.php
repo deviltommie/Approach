@@ -33,27 +33,27 @@ class Smart extends renderable
     public  $Scripts;
     public  $options=array();
 
-    function Smart($options)
+    function Smart($t='div',$pageID='',$options=array())
     {
-	global $Defaults;
-	global $renderObjectIndex;
-        
+        $this->id=renderable::$renderObjectIndex;
+        renderable::$renderObjectIndex++;                /*    Register New Renderable    */
+
+	if( is_array($t) ){ $options = $t; $this->tag= isset($t['tag']) ? $t['tag'] : 'div';}
+        else $this->tag = $t;
+
+	if( is_array($pageID) ){ $options = $pageID; $this->pageID= isset($pageID['pageID']) ? $pageID['pageID'] : get_class($this) . $this->id;}
+        else $this->pageID = $pageID;
+
         if(isset($options['template'])) $this->template = GetFile($options['template']) ;
         if(isset($options['binding'])) $this->binding = GetFile($options['binding']);
+        
+        if(isset($options['pageID']) )  $this->pageID = $options['pageID'];
+        if(isset($options['classes']) ) $this->classes = $options['classes'];
+        if(isset($options['attributes'])) $this->attributes = $options['attributes'];
+        if(isset($options['selfcontained'])) $this->selfContained = $options['selfcontained'];
+        if(isset($options['content'])) $this->content = $options['content'] . $this->content;
 
-        $this->options = $options;
-        $this->id=$renderObjectIndex;
-        $renderObjectIndex++;                /*    Register New Renderable    */
-        $options['tag']=$options['tag'];
-	
-	if(!isset($options['tag']) ){ $options['tag']=$Defaults['Renderable']; }
-        $this->tag = $options['tag'];
-        $this->pageID = (isset($options['PageID']) ) ? $options['PageID'] : get_class($this) . $this->id;
-        if(isset($options['classes']) )
-        {
-            $this->classes = $options['classes'];
-        }
-
+	$this->options=$options;
 	$this->ResolveTemplate();
         $this->BindContext();
     }

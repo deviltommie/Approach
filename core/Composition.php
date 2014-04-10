@@ -52,18 +52,12 @@ class Composition
 
     public $editable=Array();
 
-    function Composition()
+    function Composition($options=array())
     {
         global $ActiveComposition;
-        $ActiveComposition = $this;
-    }
-
-    function init($options=array())
-    {
         global $APPROACH_DOM_ROOT;
-        global $$APPROACH_DOM_ROOT;
-
-        $this->DOM = $$APPROACH_DOM_ROOT;
+        $ActiveComposition =& $this;
+        $APPROACH_DOM_ROOT =& $this->DOM;
         $this->options = $options;
     }
     
@@ -75,10 +69,10 @@ class Composition
         {
             if($child instanceof Smart)
             {
-                if($APPROACH_EDITMODE=false)
+                if($APPROACH_EDITMODE)
                 {
-                  if($child->tag != 'html' && $child->tag != 'head' && $child->tag != 'body' && $child->tag != 'script' && $child->tag != 'style')
-                    $child->classes[] = "editableFeature";
+                  if(!in_array($child->tag,renderable::$NoRenderIDs))
+                    $child->classes[] = 'editableFeature';
 
                   foreach($child->context as $WhichComponent => $InstanceContext)
                   {
@@ -105,23 +99,19 @@ class Composition
     {
         global $RegisteredScripts;
 
-        global $APPROACH_DOM_ROOT;
-        global $$APPROACH_DOM_ROOT;
         global $ApproachDebugConsole;
         global $ApproachDebugMode;
-
-        $$APPROACH_DOM_ROOT = $this->DOM;
 
         $this->ResolveComponents($this->DOM);
 
         foreach($this->ComponentList as $ComponentInstance => $Instances)
         {
-            $test='asdf';
             foreach($Instances as $Context)
             {
                 $Component = new $ComponentInstance();
-                $Component->createContext($Context['render'], $Context['data'], $Context['template']);
+                $Component->createContext($this->DOM, $Context['render'], $Context['data'], $Context['template']);
                 $Component->Load($Context['options']);
+//              $this->DOM->children[1]->children[count($this->DOM->children[1]->children)-1]->content=var_export($Component,true);
             }
         }
         foreach($this->editable as &$editableFeature)
@@ -139,14 +129,14 @@ class Composition
             $editableFeature['reference']=$references;      //Links to child template's $tokens['__self_id']
         }
 
-        $json=json_encode($this->editable);
+//        $json=json_encode($this->editable);
 
-/*
-        RegisterJQueryEvent('BUBBLE_CLASS_CLICK', 'editableFeature', $SettingsServiceCall);
-        RegisterJQueryEvent('BUBBLE_ID_CLICK', 'ApproachControlUnit', $UpdateServiceCall .PHP_EOL. $PreviewServiceCall);
-        RegisterScript($JqueryReadyFunction, true, "To Feature Editor");
-        CommitJQueryEvents();
-*/
+
+//        RegisterJQueryEvent('BUBBLE_CLASS_CLICK', 'editableFeature', $SettingsServiceCall);
+//        RegisterJQueryEvent('BUBBLE_ID_CLICK', 'ApproachControlUnit', $UpdateServiceCall .PHP_EOL. $PreviewServiceCall);
+//        RegisterScript("", true, "To Feature Editor");
+//       CommitJQueryEvents();
+
 
         foreach($this->DOM->children as $child)   //Get Body
         {
