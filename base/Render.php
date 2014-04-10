@@ -20,15 +20,17 @@
 
 */
 
-require_once('/../__config_error.php');
+//require_once('/../__config_error.php');
 
-$renderObjectIndex=0;
+
 
 class renderable
 {
-    public $belongTo=null;
+    public static $renderObjectIndex=0;
+    public static $NoRenderIDs=array('html', 'head', 'body', 'script', 'style', 'channel', 'rss', 'item');
+    
     public $id=null;
-    public $pageID=null;
+    public $pageID='';
 
     public $tag='div';
     public $classes=Array();
@@ -40,25 +42,26 @@ class renderable
     public $postFilter=null;
     public $selfContained=false;
 
-    function renderable($t='div', $PageID='', $options=array())
+    function renderable($t='div', $pageID='', $options=array())
     {
-        global $renderObjectIndex;
-        $this->id=$renderObjectIndex;
-        $renderObjectIndex++;                /*    Register New Renderable    */
+        $this->id=renderable::$renderObjectIndex;
+        renderable::$renderObjectIndex++;                /*    Register New Renderable    */
 
-	if( is_array($t) ){ $options = $t; $this->tag= $t['tag'];}
+	if( is_array($t) ){ $options = $t; $this->tag= isset($t['tag']) ? $t['tag'] : 'div';}
         else $this->tag = $t;
+
+
+	if( is_array($pageID) ){ $options = $pageID; $this->pageID= isset($pageID['pageID']) ? $pageID['pageID'] : get_class($this) . $this->id;}
+        else $this->pageID = $pageID;	
+        
+        if(isset($options['pageID']) )  $this->pageID = $options['pageID'];
         if(isset($options['template'])) $this->content = GetFile($options['template']);
-        $this->pageID = (isset($options['PageID']) ) ? $options['PageID'] : get_class($this) . $this->id;
-
-        $this->pageID = $PageID;
-        if(isset($options['PageID']) )  $this->pageID = $options['PageID'];
-        elseif($this->pageID=='')       $this->pageID= 'render' . $this->id;
-
         if(isset($options['classes']) ) $this->classes = $options['classes'];
         if(isset($options['attributes'])) $this->attributes = $options['attributes'];
         if(isset($options['selfcontained'])) $this->selfContained = $options['selfcontained'];
         if(isset($options['content'])) $this->content = $options['content'] . $this->content;
+	
+	if(in_array($this->pageID,renderable::$NoRenderIDs)) $this->tag='';
     }
 
     public function buildClasses()
@@ -92,7 +95,7 @@ class renderable
 
   public function parse($string)
   {
-    global $RecurseCount;
+/*    static $RecurseCount;
     $depth=0;
     $Condition=Array();
     $Conditions=Array();
@@ -143,7 +146,7 @@ class renderable
       if(strpos($InnerStatements, '<@--') != false) $Saved[]=$this->parse($InnerStatements);
       $begin=$Condition['Close']['End'];
     }
-
+*/
     return $string;
   }
 
@@ -159,15 +162,15 @@ class renderable
                 {
                     foreach($val as $_att=>$_val)
                     {
-                        $attribsToString .= $_att . ' ="'.$_val.'" ';
+                        $attribsToString .= $_att . '="'.$_val.'" ';
                     }
                     return $this->attributes=$attribsToString;
                 }
-                else $attribsToString .= $att . ' ="'.$val.'" ';
+                else $attribsToString .= $att . '="'.$val.'" ';
             }
             return $this->attributes=$attribsToString;
         }
-        else if(is_string($this->attributes))
+        else if(is_string($this->attributes))	
         {
             return $this->attributes;
         }
@@ -187,13 +190,14 @@ class renderable
         if($this->classes == ' class=" " ' || $this->classes == ' class="" ') $this->classes = '';
         if($this->attributes === 0){ $this->attributes = '';     }
 
-        $pageID = ( isset($this->pageID) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'body' && $this->tag != 'script' && $this->tag != 'style' && $this->tag != 'channel' && $this->tag != 'rss' && $this->tag != 'item' ) ) ?  ' id="' . $this->pageID . '" ' : '';
+        $pageID = ( $this->pageID != '' ) ?  ' id="' . $this->pageID . '" ' : '';
         $this->classes = ( isset($this->classes) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'body' && $this->tag != 'script' && $this->tag != 'style' && $this->tag != 'channel' && $this->tag != 'rss' && $this->tag != 'item' ) ) ?  $this->classes : '';
         $this->attributes = ( isset($this->attributes) && ($this->tag != 'html' && $this->tag != 'head' && $this->tag != 'script' && $this->tag != 'style') ) ?  $this->attributes : '';
 	
 	
 	//What was the cause of this bug?? Has been lost in translation
-	if($this->attributes === '0 =""' || $this->attributes==0){ $this->attributes = '';     }
+	
+	if($this->attributes === '0 =""' || $this->attributes===0){ $this->attributes = '';     }
         if($this->tag == 'rss') $this->attributes = ' version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" ';
 	
 
@@ -207,6 +211,6 @@ class renderable
 
 
 
-require_once('Utility.php');
+require_once(__DIR__.'/Utility.php');
 
 ?>

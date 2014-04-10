@@ -39,8 +39,14 @@
 
 
 global $ApproachServiceCall;
+global $RuntimePath;
+global $InstallPath;
+global $UserPath;
+global $StaticFiles;
+global $DeployPath;
+
 $ApproachServiceCall = true;
-include_once($SiteDirectory .'route.php');
+require_once($RuntimePath .'map.php');
 
 
 
@@ -230,7 +236,8 @@ class Service
               default:
               $this->Activity=array('decoding'=>'json','encoding'=>'json', 'incoming'=>$_REQUEST);
               
-              $fh = fopen("servicelog.dat", 'a') or die("can't open file");
+              global $RuntimePath; if(isset($RuntimePath))
+              $fh = fopen($RuntimePath.'service/servicelog.dat', 'a') or die("can't open file");
               $stringData = "<<< \r\n\r\n >>>" . print_r($_REQUEST, true) . "<<< \r\n\r\n >>>";
               fwrite($fh, $stringData);
               fclose($fh);
