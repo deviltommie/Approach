@@ -3,6 +3,9 @@
 #include <map>
 #include <ostream>
 #include <istream>
+#include <fstream>
+#include <sstream>
+
 
 typedef unsigned long long int ProcUnit;
 namespace Option{enum { id=0, tag, attributes, classes, properties, content, data, context, binding, component, service, message };}
@@ -70,7 +73,6 @@ namespace model
 
         XML(std::map<ProcUnit,void*> options){   XML::SetRenderID(); SetOptions(options);    }
 
-
     /**********************/
     /*****CLASS ACTIONS****/
     /**********************/
@@ -102,7 +104,10 @@ namespace model
         {
             this->children.push_back(object);
         }
-
+        void operator<<(XML object)
+        {
+            this->children.push_back(&object);
+        }
     };
     ProcUnit XML::ActiveRenderCount=0;
 
@@ -152,4 +157,5 @@ namespace model
         outputstream<<std::endl<<"</"<<object.tag<<">";
         //return outputstream;
     }
+
 }
