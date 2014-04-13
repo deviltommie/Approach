@@ -45,22 +45,53 @@ function fileSave($file, $data)
     fclose($handle);
 }
 
-function SavePHP($dbo)
+function SavePHP($dbo,$classpath='')
 {
-  $theOutput = "<? \nclass " . $dbo->table . " extends Dataset { \n";
-  $theOutput .= "\n\tpublic \$Columns=" . var_export($dbo->Columns, true);
+  global $RuntimePath;
+    /*
+     *	To Do: Move Variables into a public static Dataset::profile map
+     */
+  $RefersExist=isset($dbo->ForeignKey);
 
-  $theOutput .= ";\n\tpublic \$table='$dbo->table';";
+  $LinePrefix="\n\t";
+  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset'.PHP_EOL.'{';
 
-  if( isset($dbo->PrimaryKey) ) $theOutput .= "\n\tpublic \$PrimaryKey='$dbo->PrimaryKey';";
-  else $theOutput .= "\n\tpublic \$PrimaryKey='+++PARENT+++';";
+  //TO DO: In C++ this would be public static const, but in PHP we will need to make it protected
+  //First will need to make read-only accessor/get function in Dataset and ensure other classes are using it
+  
+  $theOutput .= $LinePrefix.'public static $profile= array(' ;
+  $theOutput .= $LinePrefix."\t'target' =>'".$dbo->table.'\',';
+  if( isset($dbo->PrimaryKey))
+  {
+	$theOutput .= $LinePrefix."\t'Accessor'=>array( ".($RefersExist?$LinePrefix."\t\t'":'').'\'Primary\' => \''.$dbo->PrimaryKey.'\'';
+	if($RefersExist)
+		$theOutput .= ','.$LinePrefix."\t\t'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\')';
+	$theOutput .= '),';
+  }
+  elseif($RefersExist)
+	$theOutput .= $LinePrefix."\t'Accessor'=>array( 'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\'),';
 
-  $theOutput .= "\n\tpublic \$data;";
-  $theOutput .= "\n}\n?>";
+  $theOutput .= $LinePrefix."\t'header'=>array( ";
+  foreach($dbo->Columns as $col => $aspect)
+  {
+	$theOutput.=$LinePrefix."\t\t'".$col.'\' => array( ';
+	foreach($aspect as $k => $v)
+	{
+		$theOutput.=' \''.$k.'\' => \''.str_replace('\'','\\\'',$v).'\',';
+	}
+	rtrim($theOutput,',');
+	$theOutput.='),';
+  }
+  rtrim($theOutput,',');
+  $theOutput.=$LinePrefix."\t".')'.$LinePrefix.');';
 
-//  print_r($theOutput);
-  fileSave($_SERVER['DOCUMENT_ROOT'] . "/Approach/Generator/Dataset/" . $dbo->table . '.php', $theOutput);
+  $theOutput .= $LinePrefix.'public $data;';
+  $theOutput .= PHP_EOL.'}'.PHP_EOL.'?>';
+
+//  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
+  fileSave($RuntimePath . 'support/datasets/' .$classpath.'/'. $dbo->table . '.php', $theOutput);
 }
+
 
 function ms_escape_string($data) {
         if ( !isset($data) or empty($data) ) return '';
@@ -147,12 +178,6 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-
-    print_r('<br><br><br><br><br>');
-    print_r($dObj->PrimaryKey);
-    print_r('<br><br><br><br><br>');
-    print_r($dObj);
-    print_r('<br><br><br><br><br>');
 
     SavePHP($dObj);
   }
