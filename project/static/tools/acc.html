@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Approach Command Console</title>
+
+	<link rel="stylesheet" id="fontawesome-css" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css?ver=4.0.3" type="text/css" media="all">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/acc.css" />
+
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="../js/acc.js"></script>
+</head>
+<body>
+<div id="Dynamics" class="Canvas">
+	<div id="terminal" class="InterfaceLayout"></div>
+	<div id="debug" class="InterfaceLayout"></div>
+</div>
+<div class="Interface">
+	<div class="InterfaceLayout">
+			<ul class="Header controls">
+
+				<li class="revert ToggleButton fa fa-refresh pull-left"></li>
+				<li class="help ToggleButton fa fa-question-circle pull-left" alt="Get Support"></li>
+				<li class="title">{[ UserName ]} - Command Console</li>
+				<li class="closer ToggleButton fa fa-times-circle down pull-right" ></li>
+				<li class="collapse ToggleButton fa fa-chevron-circle-down pull-right"></li>
+				<li class="AppMenu">
+						<ul class="DropDown">
+							<li>
+									<span class="MenuLabel">
+									<u>C</u>omposition</span>
+									<ul class="DropMenu">
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Wizard"} }' >New Composition Wizard</li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Browser"} }' >Composition Browser</li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Save"} }' >Save Composition</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Preview"} }' >Composition Preview</li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Settings"} }' >Composition Settings</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Revert"} }' >Composition Revert</li>
+										<li class="MenuButton" data-intent='{"ACTION": {"Composition": "Revert"} }' >Composition Rollback</li>
+										
+									</ul>
+							</li>
+						</ul>
+						<ul class="DropDown">
+							<li>
+									<span class="MenuLabel">Application</span>
+									<ul class="DropMenu">
+										<li class="MenuButton moderator Application Static.New ACTION">New S <u>t</u>atic Package..</li>
+										<li class="MenuButton moderator Application Dynamic.New ACTION">New <u>D</u>ynamic Package..</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton moderator Application Save ACTION"><u>S</u>ave Selected Application(s)</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton Application Search ACTION"><u>F</u>ind Packages on Instance..</li>
+										<li class="MenuButton Application Browse ACTION"><u>A</u>pplication Library..</li>
+										<li class="MenuButton User Dashboard.View ACTION">{[ UserName }]'s <u>P</u>ackages..</li>
+										<li class="MenuButton Application Revision ACTION">Application <u>R</u>ollback</li>
+									</ul>
+							</li>
+						</ul>
+						<ul class="DropDown">
+							<li>
+									<span class="MenuLabel">Media</span>
+									<ul class="DropMenu">
+										<li class="MenuButton Media Create ACTION"><u>C</u>reate Media..</li>
+										<li class="MenuButton Media Browse ACTION"><u>M</u>edia Library..</li>
+										<li class="MenuButton Media Browse ACTION"><u>I</u>mport From Feed..</li>
+										<li class="MenuButton Media Upload ACTION"><u>U</u>pload Media..</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton Media Group ACTION"><u>G</u>roup Media</li>
+										<li class="MenuButton Media Ungroup ACTION"><u>U</u>ngroup Media</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton Media Group ACTION">Distrubution &amp; C <u>D</u>N</li>
+										<li class="MenuButton Media Ungroup ACTION">Update <u>F</u>requency</li>
+										<li class="MenuSeparator"></li>
+										<li class="MenuButton Media Revision ACTION">Media <u>R</u>ollback</li>
+									</ul>
+							</li>
+						</ul>
+				</li>
+			</ul>
+			<ul class="Content">
+				<li class="InputRegion">
+						<form action="//service.nicegamez.com/action.php" method="POST" target="_blank" enctype="multipart/form-data" name="UploadForm">
+							<ul class="controls">
+									<li class="linetext">
+										<input type="text" class="blocktext" name="ApplicationMetaTitle" value="Default Title" />
+									</li>
+									<li class="blocktext">
+										<textarea rows="5" name="post_content" >Data fields here.
+jQuery can change the display easily.
+
+Services are smart at delivering and applying deltas through data tokens.</textarea>
+									</li>
+									<li class="upload mediabrowse">
+										<input type="file" size="24" name="file" />
+									</li>
+							</ul>
+							<input type="submit" value="Save" class="DarkGreen Button" />
+						</form>
+				</li>
+			</ul>
+			<ul class="Footer"></ul>
+	</div>
+</div>
+</body>
+</html>

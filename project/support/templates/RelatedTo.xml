@@ -1,0 +1,42 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+    <Component:RelatedTo type="json">
+    {
+        TableName
+        {
+            : 'AppPictogram',
+            : 'AppName',
+            : 'AppLink'
+        }
+    }
+    </Component:RelatedTo>
+    <Render:Markup bind="RelatedTo" tag="ul" class="RelatedTo">
+        <li>
+            <ul class="RelatedApp">
+                <li>[@ AppPictogram @]</li>
+                <li>[@ AppName @]</li>
+                <li>[@ AppLink @]</li>
+            </ul>
+        </li>
+        <li>
+            <ul class="RelatedApp">
+                <li>[@ AppPictogram @]</li>
+                <li>[@ AppName @]</li>
+                <li>[@ AppLink @]</li>
+            </ul>
+        </li>
+        <li>
+            <ul class="RelatedApp">
+                <li>[@ AppPictogram @]</li>
+                <li>[@ AppName @]</li>
+                <li>[@ AppLink @]</li>
+            </ul>
+        </li>
+        <li>
+            <ul class="RelatedApp">
+                <li>[@ AppPictogram @]</li>
+                <li>[@ AppName @]</li>
+                <li>[@ AppLink @]</li>
+            </ul>
+        </li>
+    </Render:Markup>
+</Template>
