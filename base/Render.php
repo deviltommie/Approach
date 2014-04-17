@@ -60,16 +60,8 @@ class renderable
 		if(isset($options['attributes'])) $this->attributes = $options['attributes'];
 		if(isset($options['selfcontained'])) $this->selfContained = $options['selfcontained'];
 		if(isset($options['content'])) $this->content = $options['content'] . $this->content;
-/*
-	if($this->tag == 'rss')
-	{
-		$this->attributes['version'] = '2.0';
-		$this->attributes['xmlns:media']='http://search.yahoo.com/mrss/';
-		$this->attributes['xmlns:dc']='http://purl.org/dc/elements/1.1/';
-		$this->attributes['xmlns:dcterms']='http://purl.org/dc/terms/';
-	}
-*/	
-	if(in_array($this->tag,renderable::$NoAutoRender)) $this->pageID='';
+
+		if(in_array($this->tag,renderable::$NoAutoRender)) $this->pageID='';
 	}
 
 	public function buildClasses()
@@ -208,6 +200,6 @@ class renderable
 
 
 
-require_once(__DIR__.'/Utility.php');
+//require_once(__DIR__.'/Utility.php');
 
 ?>

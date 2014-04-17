@@ -1,0 +1,298 @@
+.Interface form{   display:inline-block; width: 100%; }
+.Interface input{	background-color:#fff; margin: 1em 0px;	line-height: 1.2em; height: 2em; }
+.Interface .InputRegion label{   margin-bottom:15px; margin: 1em 0px;	}
+.Interface textarea{ display: inline-block; width: 100%; margin: 1em 0px;}
+.Interface input, .Interface textarea{behavior:url('PIE.htc');    border-radius:12px;    -moz-border-radius: 12px;    -webkit-border-radius:12px; padding: 4px;	}
+.Interface ul{ padding: 0px; }
+
+.Wizard, .Interface
+{
+   width:600px;
+   height: 420px;
+   position:absolute;
+
+}
+.Interface{ left: 4em; top: 4em; }
+.Wizard li, .Interface li{ list-style-type:none;}
+.Interface .InterfaceLayout
+{
+	behavior:url('PIE.htc');
+    overflow:hidden;
+    position: relative;
+    width: 600px; height:100%;
+    margin: 0px; padding: 0px;
+	top: 0px; left: 0px;
+    z-index: 1000;
+
+    behavior:url('PIE.htc');
+    border-radius:12px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius:12px;
+
+	border:1px solid #777;
+
+	background-image: linear-gradient(bottom, rgb(228,228,228) 0%, rgb(254,254,254) 100%);
+	background-image: -o-linear-gradient(bottom, rgb(228,228,228) 0%, rgb(254,254,254) 100%);
+	background-image: -moz-linear-gradient(bottom, rgb(228,228,228) 0%, rgb(254,254,254) 100%);
+	background-image: -webkit-linear-gradient(bottom, rgb(228,228,228) 0%, rgb(254,254,254) 100%);
+	background-image: -ms-linear-gradient(top, rgb(228,228,228) 0%, rgb(254,254,254) 100%);
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(228,228,228)),
+		color-stop(1, rgb(254,254,254))
+	);
+}
+
+.Interface .Header
+{
+	behavior:url('PIE.htc');
+	height: 42px; width: 100%; padding:0px; margin: 0px;
+	position: absolute; top: 0px; left: 0px; z-index: 1100;
+	font-size: 13px; font-family: Palatino, Georgia, Garamond, Avant-Garde, Helvetica, Times, Arial;
+
+	border-top-left-radius:12px;
+	border-top-right-radius:12px;
+
+	-moz-box-shadow: 0px 1px 2px #050405;
+	-webkit-box-shadow: 0px 1px 2px #050405;
+	box-shadow: 0px 1px 2px #050405;
+	background-color: #eed;
+}
+
+.Interface .Content
+{
+	width: 100%;
+	height:336px;
+	margin: 0px;
+	padding: 8px;
+	
+	overflow-y: scroll;
+
+	position: absolute;
+	top: 42px;
+	left: 0px;
+	z-index: 1001;
+ }
+.Interface .Header li{ display:inline-block; list-style: none; }
+ 
+.Interface .Footer
+{
+	behavior:url('PIE.htc');
+	width:100%;
+	margin:0px;
+	padding:0px;
+	position:absolute;
+	bottom:0px;
+	left:0px;
+	height:40px;
+	margin-top: 12px;
+	border-top: 1px solid black;
+	border-bottom-left-radius:12px;
+	border-bottom-right-radius:12px;
+	background-color: #eed;
+}
+
+.Interface .AppMenu{	display:block; height:18px; position:absolute; width: 100%; left: 0%; margin-left: 4px; bottom:0px;	}
+.Interface .DropDown{	margin: 0px; padding: 0px 6px;  display: inline-block; float: left;  height: 18px; z-index:1002;	}
+.Interface .DropDown:hover
+{
+	behavior:url('PIE.htc');
+	background-color:#ffffee;
+	border-top-left-radius:3px;
+	border-top-right-radius:3px;
+	-moz-box-shadow: 0px 0px 1px #050405;
+	-webkit-box-shadow: 0px 0px 1px #050405;
+	box-shadow: 0px 0px 1px #050405;
+}
+
+.DropDown .MenuLabel{ width: 100%; display: inline-block;}
+.DropDown li{ width: 100%; display: inline-block; position: relative; top: 0px; left: 0px; }
+.DropMenu {font-size: 12px; border: 1px solid #000; padding: 0px; margin: 0px; margin-left:1px; padding-left: 4px; padding-right: 4px; background-color:#eec; width: 176px; position: absolute; line-height: 15px;top: 1.5em; left: -6px; display: none; text-align: left; z-index: 1100; }
+.DropMenu li{ width: 100%; }
+.DropMenu li:hover{
+	behavior:url('PIE.htc');
+	background-color:#ffe;
+	-moz-box-shadow: 0px 0px 2px #fafad2;
+	-webkit-box-shadow: 0px 0px 2px #fafad2;
+	box-shadow: 0px 0px 2px #fafad2;
+}
+.DropMenu .MenuSeparator{ height: 1px; border-top: 1px solid #775; background-color: #ffe; }
+
+.Interface .Header .title
+{
+    position: absolute;
+    left: 50%;
+    margin-left: -40%;
+    width: 80%;
+    height: 21px;
+    top: 0px;
+	border: 0px hidden;
+    font-size: 16px;
+    line-height: 18px;
+    text-align: center;
+    z-index: 1000;
+    color: #2f4f4f;
+    clear:both;
+    font-family: sans-serif, arial;
+}
+
+.Interface .InterfaceLayout .Header .ToggleButton
+{	behavior:url('PIE.htc');	margin: 2px;
+	font-size: 20px;
+	cursor: pointer; cursor: hand;
+	color: #bbb;
+	text-shadow: 0px 2px 0px #222;
+}
+.Interface .InterfaceLayout .Header .ToggleButton:hover
+{	behavior:url('PIE.htc');
+	color: #ccc;
+	text-shadow: 0px 0px 3px #222;
+}
+.Interface .InterfaceLayout .Header .ToggleButton:active
+{	behavior:url('PIE.htc');
+ 	color: #fff;
+	text-shadow: 0px 0px 3px #000;
+}
+
+
+.Wizard .Content .Slide, .Wizard .Content li{ padding:10px 10px 10px 10px; }
+.Wizard .Content .Slide
+{
+   display:none;
+   height: 294px;
+   overflow-x:hidden;
+   overflow-y:hidden;
+   width:582px;
+   position: absolute;
+   top: 0px;
+   left: 0px;
+   z-index: 50;
+}
+
+
+.Wizard .form-search{    padding-top:32px;	}
+.Wizard .title{font-family:helvetica}
+.Wizard .Content  .active{   display:inline-block;	}
+.Wizard .Content .InputRegion
+{
+    color:#777;
+    font-size:16pt;
+    font-family: helvetica;
+}
+
+#Dynamics{ position: absolute; width: 38em; height: 100%; top: 0px; right: 0px; margin-left: -38em; }
+#Dynamics #terminal
+{
+	width: 38em;
+	height: 100%;
+	overflow: auto;
+	position: absolute;
+	background-color: black;
+/*	color: #5F7;*/
+	border: 4px solid #888;
+	border-radius: 12px;
+}
+
+
+
+
+
+
+
+
+
+
+
+.Button
+{
+	behavior:url('PIE.htc');
+    overflow:hidden;
+    position: relative;
+    height:1.4em;
+    display:inline-block;
+    color:#fff;
+    font-family:Verdana;
+    margin: 6px; padding: 4px;
+
+    border-radius:12px;
+    -moz-border-radius: 12px;
+    -webkit-border-radius:12px;
+
+    -moz-box-shadow:inset 0px 0px 3px #050405;
+    -webkit-box-shadow:inset 0px 0px 3px #050405;
+    box-shadow:inset 0px 0px 3px #050405;
+    border:1px solid #777;
+
+}
+.DarkGreen
+{
+	behavior:url('PIE.htc');
+    background-image: linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,230,64) 51%);
+    background-image: -o-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,230,64) 51%);
+    background-image: -moz-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,230,64) 51%);
+    background-image: -webkit-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,230,64) 51%);
+    background-image: -ms-linear-gradient(top, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,230,64) 51%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.01, rgb(5,5,5)),
+        color-stop(0.99, rgb(42,46,42)),
+        color-stop(0.51, rgb(64,230,64))
+    );
+}
+.DarkRed
+{
+	behavior:url('PIE.htc');
+    background-image: linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,64,64) 51%);
+    background-image: -o-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,64,64) 51%);
+    background-image: -moz-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,64,64) 51%);
+    background-image: -webkit-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,64,64) 51%);
+    background-image: -ms-linear-gradient(top, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,64,64) 51%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.01, rgb(5,5,5)),
+        color-stop(0.99, rgb(42,46,42)),
+        color-stop(0.51, rgb(230,64,64))
+    );
+}
+.DarkBlue
+{
+	behavior:url('PIE.htc');
+    background-image: linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,64,230) 51%);
+    background-image: -o-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,64,230) 51%);
+    background-image: -moz-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,64,230) 51%);
+    background-image: -webkit-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,64,230) 51%);
+    background-image: -ms-linear-gradient(top, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(64,64,230) 51%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.01, rgb(5,5,5)),
+        color-stop(0.99, rgb(42,46,42)),
+        color-stop(0.51, rgb(64,64,230))
+    );
+}
+.Button a{ color: white; text-decoration: none; }
+.Button:hover, .DarkYellow
+{
+	behavior:url('PIE.htc');
+    background-image: linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,230,64) 51%);
+    background-image: -o-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,230,64) 51%);
+    background-image: -moz-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,230,64) 51%);
+    background-image: -webkit-linear-gradient(bottom, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,230,64) 51%);
+    background-image: -ms-linear-gradient(top, rgb(5,5,5) 1%, rgb(42,46,42) 99%, rgb(230,230,64) 51%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.01, rgb(5,5,5)),
+        color-stop(0.99, rgb(42,46,42)),
+        color-stop(0.51, rgb(230,230,64))
+    );
+}
+

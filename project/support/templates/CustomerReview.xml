@@ -1,0 +1,20 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+    <Component:AppCustomerReviews type="json">
+    {
+        TableName
+        {
+            :'RatingWord',
+            :'Rating',
+            :'Username',
+            :'UserReview'
+        }
+    
+    }
+    </Component:AppCustomerReviews>
+    <Render:Markup bind="AppCustomerReviews" tag="ul" class="CustomerReviews">
+        <li><h2>Customer Reviews</h2></li>
+        <li class="Rating">[@ RatingWord @] [@ Rating @]</li>
+        <li class="Username">By [@ Username @]</li>
+        <li class="UserReview">[@ UserReview @]</li>
+    </Render:Markup>
+</Template>

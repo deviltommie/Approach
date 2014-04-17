@@ -1,0 +1,15 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+    <Component:AppDesciption type="json">
+    {
+        TableName
+        {
+            :'Description'
+        }
+    
+    }
+    </Component:AppDesciption>
+    <Render:Markup bind="AppDescription" tag="ul" class="Description">
+        <li><h2>Description</h2></li>
+        <li class="Description">[@ Description @]</li>
+    </Render:Markup>
+</Template>

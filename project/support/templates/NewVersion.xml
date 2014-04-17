@@ -1,0 +1,16 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+    <Component:AppUpdate type="json">
+    {
+        TableName
+        {
+            :'VersionNr',
+            :'PatchNotes'
+        }
+    
+    }
+    </Component:AppUpdate>
+    <Render:Markup bind="AppUpdate" tag="ul" class="Patch">
+        <li class="Version"><h2>What's new in Version [@ VersionNr @]</h2></li>
+        <li class="PatchNotes">[@ PatchNotes @]</li>
+    </Render:Markup>
+</Template>

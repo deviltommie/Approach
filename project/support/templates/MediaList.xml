@@ -1,0 +1,24 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+	<Component:MediaList type="json">
+	{
+		"compositions":
+		{
+			"title" : "MediaHeading",
+			"alias" : "name",
+			"tags"  : "keywords",
+			"media" : "thumb"
+		}
+	}
+	</Component:MediaList>
+	<Render:Markup bind="MediaList" tag="ul" class="MediaList">
+	<li class="media">
+		<a class="pull-left" href="#">
+		 <img class="media-object" src="[@ thumb @]" alt="[@ name @]" />
+		</a>
+		<article class="media-body">
+			<h4 class="media-heading">[@ MediaHeading @]</h4>
+			[@ name @] is tagged in: [@ keywords @]
+		</article>
+	</li>
+	</Render:Markup>
+</Template>

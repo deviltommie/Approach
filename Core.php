@@ -9,18 +9,36 @@
  Feel free to contact me dev to dev!
  
  *************************************************************************/
- 
- 
-$SiteDirectory = '/var/www/html/approachfoundation.org/';
-$InstallPath = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['SCRIPT_NAME']));
+error_reporting(E_ERROR);
 
-require_once('__config_error.php');
-require_once('__config_database.php');
+global $RuntimePath;
+global $InstallPath;
+global $UserPath;
+global $StaticFiles;
+global $DeployPath;
+global $ApproachRegisteredService;
 
-//require_once('Core/Service.php');
-require_once('base/Renderables/DisplayUnits.php');
-//require_once('Core/Services/Registrar.php');
+$RuntimePath    =__DIR__;
+$InstallPath    =__DIR__.'/../approach';
+$UserPath       =__DIR__.'/support/components';
+$StaticFiles    ='//static.nicegamez.com';
+$DeployPath     ='//www.nicegamez.com';
 
-require_once('core/Composition.php');
+
+require_once($RuntimePath.'/support/_error.php');
+require_once($RuntimePath.'/support/_database.php');
+
+require_once($InstallPath.'/base/Renderables/DisplayUnits.php');
+require_once($InstallPath.'/base/Dataset.php');
+require_once($InstallPath.'/base/Smart.php');
+
+require_once($InstallPath.'/core/Component.php');
+require_once($InstallPath.'/core/Composition.php'); 
+//require_once($InstallPath.'/core/Service.php');
+
+require_once($UserPath.'/UserComponents.php');
+
+//require_once($RuntimePath.'services/Registrar.php');
+
 
 ?>

@@ -1,0 +1,25 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+    <Component:AppDetails type="json">
+    {
+        ALL
+        {
+            : 'Version',
+            : 'Author',
+            : 'Seller',
+            : 'Releasedate',
+            : 'Filesize',
+            : 'Advisoryrating',
+            : 'Categories'
+        }
+    }
+    </Component:AppDetails>
+    <Render:Markup bind="AppDetails" tag="ul" class="addDetails">
+        <li class="version">Version: [@ Version @]</li>
+        <li class="developername">Created by: [@ Author @]</li>
+        <li class="sellername">Sold by: [@ Seller @]</li>
+        <li class="releasedate">Released: [@ Releasedate @]</li>
+        <li class="filesize">File Size: [@ Filesize @]</li>
+        <li class="advisoryrating">Age Rating: [@ Advisoryrating @]</li>
+        <li class="categories">Categories: [@ Categories @]</li>
+    </Render:Markup>
+</Template>
