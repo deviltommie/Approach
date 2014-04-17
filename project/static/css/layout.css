@@ -1,177 +1,73 @@
-* html, html
+* html, html,body{    position: absolute; z-index: 1;    width:100%; height: 100%; margin: 0px;    padding: 0px;    border: 0px;    left: 0px; top:0px;    overflow-x:hidden;}
+.sheer{ margin: 0px; padding: 0px; border: 0px; }
+.fill{width:100%;left:100%;}
+
+body{ background-color: white !important;}
+
+ul,li,ul li{ list-style: none; }
+#Dynamics{display: none;}
+
+#Stage
 {
-    background-color: #F4F4F4;
+    width: 100%;
+    top: 0px; left: 0px;
+    margin: 0px; border: 0px; padding: 0px;
     position: absolute;
-    left: 0px; top:0px;
-    width: 100%; height: 100%;
+    background-color: #111;
     z-index: 1;
-    padding-bottom: 220px;
-    display: block;
 }
 
-html, body, * html body, .sheer{ margin: 0px; padding: 0px; border: 0px; overflow: hidden; }
-body{position: relative;  display: inline-block; height: 100%; width: 100%; padding-bottom: 0px; }
+
+#bs-example-navbar-collapse-1{ padding-left: 0px;}
+#Navigation
+{
+    position: absolute;   
+    top: 20px;
+    left: 50%; margin-left: -40%; /*  margin-left is negative half the size of the box    */
+    padding-left: 0px !important;
+    width: 80%;
+    background-color: #101010;
+    border: 1px solid #888;
+    z-index: 1000;
+}
+#Navigation a{ color: white; }
+#Navigation ul.dropdown-menu a{ color: black; }
+#Navigation li.open a.dropdown-toggle{ background-color: #444; }
+
+#Content{ padding-top: 22px; background-color: #aaa; border-top: 8px solid #333;border-bottom: 8px solid #333;  color: #111; display: inline-block; width: 100%; position: relative; top:500px; }
 
 #Screen
 {
-    position: absolute; z-index: 2;    
-    top: 0px;
-    bottom: 220px;
-    width: 100%;
-
-    text-align: center;
-    vertical-align: middle;
-    background-color: #F4F4F4;
-    background: #F4F4F4 url('../img/background/pillar2.png') repeat-x;
-    background-position: center bottom;
-}
-
-
-#Screen #Stage
-{
-    display: inline-block;
-    position: absolute;
-    top: 50%; left: 50%;
-    margin-left: -372px;
-    margin-top: -260px;
-    width: 744px; height: 520px;
-    z-index: 10;
-    border: 1px solid black;
-}
-
-
-
-#Ribbon
-{
-    position: absolute; 
-    left: 0px; width: 100%;
-    margin-top: -220px;    z-index: 40;
-
-    bottom: 0px; 
-    height: 220px;
-    background: #fff url('../img/background/ribbon320-a.png') repeat-x;
-    background-position: 0 0px;
-    
-    overflow: hidden;
-}
-
-
-
-
-
-#ApproachStruct
-{
-    position: absolute;
-    left: 100%;
-    margin-left: -280px;
-    margin-top: -200px;
-    
-    top: 100%;
-    height: 320px;
-    width: 320px;
-    z-index: 55;
-    
-    filter: alpha(opacity=19);
-    -khtml-opacity: 0.19;
-    -moz-opacity: 0.19;
-    opacity: 0.19;
-
-}
-
-
-
-
-
-
-#footer
-{
-    color: white;
-    height:32px;
-    width: 100%;
-    top: 100%;
     position: absolute;
     
-    margin-top: -32px;
-    padding: 0px;
-    display: block;
-    text-align: center;
-    vertical-align: middle;
-    line-height: 32px;
-    overflow: hidden;
-    z-index: 50;
+    top: 144px; left: 0px;    width: 100%;
+/*    left: 50%; margin-left: -570px; /*  margin-left is negative half the size of the box    */
+
+    background-color: #ddd;
 }
-
-#footer li
+#Screen.homepage
 {
-    list-style: none;
-    padding-left: 24px;
-    padding-right: 24px;
-    margin: 0px;
-    display: inline-block;
-    position: relative;
-    height: 32px;
-    border-right: 1px;
-    border-right-style: solid;
-    border-left: 1px;
-    border-left-style: solid;
-    border-color: #334;
-    width: 108px;
-    z-index: 100;
-    background-color: #334;
-    color: #CCE;
-    -webkit-border-top-left-radius: 54px;
-    -webkit-border-top-right-radius: 54px;
-    -moz-border-radius-topleft: 54px;
-    -moz-border-radius-topright: 54px;
-    border-top-left-radius: 54px;
-    border-top-right-radius: 54px;
-
-    text-shadow: 0 1px 1px rgba(0,0,0,.3);    
-    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
-    box-shadow: 0 1px 2px rgba(0,0,0,.2);
-}
-
-
-
-
-#footer .notice
-{
-    width: auto;
-    padding: 2px 4px 1px 4px;
-    
-    
     position: absolute;
-    right: 8px;
-    font-size: 10px;
-    bottom: 0px;
-    line-height: 16px;
-    text-align: right;
-    border-right-style: none;
-    border-left-style: none;
-    height: 16px;
-    z-index: 99;
-    -webkit-border-top-right-radius: 0px;
-    -moz-border-radius-topright: 0px;
-    border-top-right-radius: 8px;
     
-    behavior: url('PIE.css');
+    top: 0px; left: 0px;    width: 100%;
+/*    left: 50%; margin-left: -570px; /*  margin-left is negative half the size of the box    */
+
+    background-color: #ddd;
 }
 
+#NavHome{
+    text-decoration: none;
+    color: #eee;
+    font-size: 32px;
+    font-family: 'Orbitron', sans-serif;
+}
 
-#footer .SubNav{ display: none;}
-
-#Dynamics{display: none;}
-
-
-#footer #nav0{ background-color: white; color: #334;}
-#footer #nav1{ background-color: #5af; color: #27b;}
-#footer #nav2{ background-color: #7f7; color: #4b4;}
-#footer #nav3{ background-color: #e4d842; color: #a49232;}
-
-
-#footer #nav0:hover{ background-color: bbb; color: #eee;}
-#footer #nav1:hover{ background-color: #27b; color: #334;}
-#footer #nav2:hover{ background-color: #4b4; color: #334;}
-#footer #nav3:hover{ background-color: #a49232; color: #334;}
-
+#RememberMe, #LoginModal{
+    margin-bottom: 0px;
+    padding-bottom: 7px;
+}
+#RememberMe .checkbox { display: inline-block; }
+#ModalLoginButton { margin-left: 10px}
+#ModalRegisterButton{
+    background-color: #F3F781;
+}

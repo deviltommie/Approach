@@ -1,0 +1,36 @@
+<Template xmlns:Component="Component://approach.im" xmlns:Render="Render://approach.im">
+<Component:AppCard type="json">
+{
+    "MobileApps" :
+    {
+        "Permalink": "ProfileLink",
+        "Thumb_large": "Thumbnail",
+        "Title": "Subtitle",
+        "Thumb_small": "Rating",
+        "Title": "AppName",
+        "SourceID": "Votes",
+        "Platform": "isiOS",
+        "ReleaseDate": "isAndroid",
+        "Description": "Description",
+        "Price": "Price",
+        "SourceCategory":"Category",
+        "Publisher":"Studio"
+    }
+}
+</Component:AppCard>
+<Render:Markup bind="AppCard" tag="ul" class="AppCard">
+    <li class="Thumbnail">
+        <a href="http://sandbox.mapative.com:8082/[@ Category @]/[@ Studio @]/[@ AppName @]"> <img src="[@ Thumbnail @]" alt="[@ Subtitle @]" title="[@ Subtitle @]" /> </a></li>
+    <li class="Rating"><img src="http://www.apptism.com/img/rate[@ Rating @].png" /></li>
+    <li class="Subtitle"> <a href="http://sandbox.mapative.com:8082/[@ Category @]/[@ Studio @]/[@ AppName @]">  [@ AppName @] </a> </li>
+    <li class="more">
+        <ul class="ExtendedInfo">
+            <li class="AppName">[@ AppName @]</li>
+            <li class="Rating"><img src="http://www.apptism.com/img/rate[@ Rating @].png" />( [@ Votes @])</li>
+            <li class="Platform"><span>[@ isiOS @]</span><span>[@ isAndroid @]</span></li>
+            <li class="Description">[@ Description @]</li>
+            <li class="Downloads"><a href="[@ ProfileLink @]"> <span>[@ Price @]</span> </a><span class="Share"></span></li>
+        </ul>
+    </li>
+</Render:Markup>
+</Template>

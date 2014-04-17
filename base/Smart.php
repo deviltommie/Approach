@@ -44,127 +44,80 @@ class Smart extends renderable
 	if( is_array($pageID) ){ $options = $pageID; $this->pageID= isset($pageID['pageID']) ? $pageID['pageID'] : get_class($this) . $this->id;}
         else $this->pageID = $pageID;
 
-        if(isset($options['template'])) $this->template = GetFile($options['template']) ;
+        if(isset($options['template'])) $this->template = GetFile($options['template']);
         if(isset($options['binding'])) $this->binding = GetFile($options['binding']);
-        
+
         if(isset($options['pageID']) )  $this->pageID = $options['pageID'];
         if(isset($options['classes']) ) $this->classes = $options['classes'];
         if(isset($options['attributes'])) $this->attributes = $options['attributes'];
         if(isset($options['selfcontained'])) $this->selfContained = $options['selfcontained'];
         if(isset($options['content'])) $this->content = $options['content'] . $this->content;
 
-	$this->options=$options;
-	$this->ResolveTemplate();
+		$this->options=$options;
+		$this->ResolveTemplate();
         $this->BindContext();
     }
-    
+
     public function ResolveTemplate()
     {
-	if(isset($this->template) && $this->template != null)
-        {
-            $dataSet=simplexml_load_string($this->template);
+		if(isset($this->template) && $this->template != null)
+		{
+			$markup=array();
+			$dataSet=simplexml_load_string($this->template);
 
-            $TemplateBindings=$dataSet->xpath('//Component:*');	    
-            $markupHeaders=$dataSet->xpath('//Render:*');
+			$TemplateBindings=$dataSet->xpath('//Component:*');
+			$markupHeaders=$dataSet->xpath('//Render:*');
 
             foreach($TemplateBindings as $binding)
-            {
-               $this->TemplateBinding[$binding->getName()] = json_decode((string)$binding,true);
-            }
-            unset($TemplateBindings);
-
-	    $markup=array();
-
-            foreach($markupHeaders as $mark)
-	    {
-		//To Do: Bring Optimized XML Parser To Utility.
-		$markup[]=strrev( explode('<',	strrev( explode('>',$mark->asXML(),2)[1]	),2)[1] );
-	    }
-            $this->markup = array_merge($this->markup,$markup);
-        }
-    }
+			{
+				$this->TemplateBinding[$binding->getName()] = json_decode((string)$binding,true);
+			}
+			unset($TemplateBindings);
+			foreach($markupHeaders as $mark)
+			{
+				$tmpStr=$mark->asXML();
+				$markup[]=$tmpStr=substr($tmpStr,strpos($tmpStr,'>',15)+1,-16);
+			}
+			$this->markup = array_merge($this->markup,$markup);
+		}
+	}
 
     public function BindContext()
     {
       $ActiveComponent='';
       $i=0;   $IsComponent;
-      
+
       foreach($this->TemplateBinding as $ComponentName => $Component)
       {
-          $IsComponent=false;
-          switch($ComponentName)
-          {
-             case '__scripts_head' : foreach($Component as $Name => $Script)
-                                    {
-                                        $this->Scripts['head'][$Name]= $Script;
-                                    }
-                                    break;
-             case '__scripts_tail' : foreach($Component as $Name => $Script)
-                                    {
-                                        $this->Scripts['tail'][$Name]= $Script;
-                                    }
-                                    break;
-             default: $IsComponent=true; break;
+		if(gettype(reset($Component)) === gettype('string'))	$i++;
+		foreach($Component as $Dataclass => $Properties)
+		{
+			$context['data'][]=$Dataclass;
+			if(!isset($this->options[$ComponentName][$Dataclass]) && isset($this->options[$ComponentName]['*']) ) //Propagate options to all
+				$this->options[$ComponentName][$Dataclass]=$this->options[$ComponentName]['*'];
+			if(!isset($this->options[$ComponentName][$Dataclass]))
+				$this->options[$ComponentName][$Dataclass] = array();
+			//else	$this->options[$ActiveComponent][$Dataclass][] = $Table;
+		}
 
-          }
+		$context['self']=&$this;
+		$context['render']=$this->id;
+		$context['options']=$this->options[$ComponentName];
+		$context['template']=$this->options['template'];
 
-
-          //End Special Cases For Template Sections
-          if($IsComponent)
-          {
-            $ActiveComponent = $ComponentName;
-            
-	    if(gettype(reset($Component)) === gettype("string"))
-            {
-                $i++;
-            }
-	    /*print_r($ComponentName);
-	    print_r($Component);
-	    */
-            foreach($Component as $Name => $Table)
-            {	
-	      $TablesHolder[]=$Name;
-              if(!isset($this->options[$ActiveComponent][$Name]) && isset($this->options[$ActiveComponent]['ALL']) ) //Propagate options to all
-              {
-                  $this->options[$ActiveComponent][$Name]=$this->options[$ActiveComponent]['ALL'];
-              }
-              if(!isset($this->options[$ActiveComponent][$Name]))
-              {
-                  $this->options[$ActiveComponent][$Name] = array();
-		//  $this->options[$ActiveComponent][$Name][] = $Table;		  
-              }
-	      //else{ $this->options[$ActiveComponent][$Name][] = $Table; }
-            }
-
-            $context['render']=$this->id;
-            $context['data']=$TablesHolder;
-            $context['options']=$this->options[$ActiveComponent];
-            $context['template']=$this->options['template'];
-
-            $this->context[$ActiveComponent]=$context;
-          }
-          else
-          {
-            unset($this->TemplateBinding[$ComponentName]);
-          }
+		$this->context[$ComponentName]=$context;
       }
     }
 
     public function Tokenize()
     {
-      $ActiveComponent='';
-      $ActiveTable='';
-
-      foreach($this->TemplateBinding as $Component => $Tables)
+      foreach($this->TemplateBinding as $ActiveComponent => $Dataclasses)
       {
-        $ActiveComponent = $Component;
-        foreach($Tables as $Name => $PropertyList)
+        foreach($Dataclasses as $ActiveDataclass => $PropertyList)
         {
-          $ActiveTable=$Name;
-          foreach($PropertyList as $Column => $NewToken)
+          foreach($PropertyList as $ActiveProperty => $NewToken)
           {
-            $this->tokens[$NewToken]=
-            $this->data[$ActiveComponent][$ActiveTable][$Column];
+            $this->tokens[$NewToken]=$this->data[$ActiveComponent][$ActiveDataclass][$ActiveProperty];
           }
         }
       }

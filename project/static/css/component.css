@@ -1,0 +1,32 @@
+.round
+{
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 0 2px 2px rgba(200,200,200,0.5);
+}
+.Button
+{
+    position: relative;
+    display: inline-block;
+    background: #9898ca;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.HorizontalList
+{
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.AppCard
+{
+    display: inline-block;
+    margin-right: auto;
+    background: #ddc;
+    color: #333;
+    position: relative;
+}

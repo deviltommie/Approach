@@ -1,0 +1,17 @@
+.HomeNav {    border-radius: 5px 5px 5px 5px;   }
+#Navigation button.navbar-btn{margin-right: 8px;}
+#MainHomeSlider
+{
+    text-align: center;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 500px;
+    background-color: rgba(0,0,0,0.5);
+}
+#MainHomeSlider .carousel-inner .item img{    height: 500px !important;  display: inline-block;  }
+.carousel .item { background-color: #777; height: 100%; }
+.carousel .item img{ height: 100%; }
+
+#HomePageFeatures {text-align: center; }
