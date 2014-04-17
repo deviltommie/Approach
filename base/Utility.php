@@ -22,6 +22,27 @@
 
 
 require_once('Render.php');
+global $RuntimePath;
+global $InstallPath;
+global $UserPath;
+global $StaticFiles;
+global $DeployPath;
+global $ApproachDebugMode;
+global $ApproachDebugConsole;
+
+//if(!isset($ApproachServiceCall)) $ApproachServiceCall = true;
+if(!isset($RuntimePath)) $RuntimePath = __DIR__.'/../..'; //if no runtime path, escape from the approach directory
+
+$ApproachDebugConsole = new renderable('div', 'ApproachDebugConsole');
+$ApproachDebugMode = false;
+function approach_dump($refer)
+{
+	ob_start();
+	var_dump($refer);
+	$r=ob_get_contents();
+	ob_end_clean();
+	return $r;
+}
 
 /*
 
@@ -49,7 +70,6 @@ $MultiElements=function GetRenderablesByTag($root, 'div');
 
 
 */
-
 
 function filterXML( $tag, $content, $styles, $properties)
 {
@@ -83,6 +103,37 @@ function GetFile($path, $override=false)
     return $APPROACH_REGISTERED_FILES[$path];
 
 }    //Local Scope File Caching
+
+function curl($url)
+{
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+  $data = curl_exec($ch);
+  curl_close($ch);
+  return $data;
+}
+function Blame($Container)
+{
+    $Reason='';
+    foreach($Container as $key => $value)
+    {
+        $Reason.=('Key: '. $key .' Value: '. $value ."\r\n");
+    }
+    exit($Reason);
+}
+function Complain($Container)
+{
+    $Reason='';
+    foreach($Container as $key => $value)
+    {
+        $Reason.=('Key: '. $key .' Value: '. $value ."\r\n");
+    }
+    print_r($Reason);
+    return false;
+}
+
+
 
 
 
@@ -183,9 +234,27 @@ function GetRenderableByPageID(&$root,$PageID)
 }
 
 
-$ApproachDebugConsole = new renderable('div', 'ApproachDebugConsole');
-$ApproachDebugMode = false;
+function ArrayFromURI(&$uri)
+{
+    $result=array();
+    $uri = urldecode($uri);
+    $exts=array('.aspx','.asp','.jsp','.php','.html','.htm','.rhtml','.py','.cfm','.cfml', '.cpp', '.c', '.ruby','.dll', '.asm');
+    $uri = str_replace($exts, '', $uri);
+    $result = explode('/',$uri);
 
-require_once('ClientEvents.php');
+    for($i=0, $L=count($result); $i<$L; $i++)
+    {
+        if($result[$i] == '' || empty($result[$i])){ unset($result[$i]); continue; }
+        else $result[$i] = strtolower($result[$i]);
+    }
+
+    return  array_values($result);
+}
+
+
+
+
+
+
 
 ?>

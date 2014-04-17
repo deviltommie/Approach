@@ -44,51 +44,12 @@ global $InstallPath;
 global $UserPath;
 global $StaticFiles;
 global $DeployPath;
+function ServiceException($mode, $ThrowingService, $key){ if($mode == 'require') return $key .' is a required value for ' . $ThrowingService . ' to run properly.';  }
 
-$ApproachServiceCall = true;
-require_once($RuntimePath .'map.php');
+if(!isset($ApproachServiceCall)) $ApproachServiceCall = true;
+if(!isset($RuntimePath)) $RuntimePath = __DIR__.'/../..'; //if no runtime path, escape from the approach directory
 
-
-
-function curl($url)
-{
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
-  $data = curl_exec($ch);
-  curl_close($ch);
-  return $data;
-}
-function Blame($Container)
-{
-    $Reason='';
-    foreach($Container as $key => $value)
-    {
-        $Reason.=('Key: '. $key .' Value: '. $value ."\r\n");
-    }
-    exit($Reason);
-}
-function Complain($Container)
-{
-    $Reason='';
-    foreach($Container as $key => $value)
-    {
-        $Reason.=('Key: '. $key .' Value: '. $value ."\r\n");
-    }
-    print_r($Reason);
-    return false;
-}
-
-
-
-function ServiceException($mode, $ThrowingService, $key)
-{
-    if($mode == 'require') return $key .' is a required value for ' . $ThrowingService . ' to run properly.';
-}
-
-
-
-
+require_once(__DIR__ .'/../base/Utility.php');
 
 class Service
 {
@@ -103,11 +64,6 @@ class Service
 
     public function Service()
     {
-        global $APPROACH_SAVE_FLAG;
-
-         header('Content-type: text/html');
-         header('Access-Control-Allow-Origin: *');
-
         $Container=array();
         $this->Message['authorization']=array();
         $this->Message['context']=array();
@@ -148,7 +104,7 @@ class Service
 
           $CompositoinOptions=array();
           if(isset($this->Message['context']['component']) && isset($this->Message['context']['instance']) && isset($this->Message['context']['child']))
-          $APPROACH_SAVE_FLAG[$this->Message['context']['component']][$this->Message['context']['child']]=true;
+            ${$this->Message['context']['component']}::$SaveFlag[(int)$this->Message['context']['child']]=true;//=true;
 
           if((!isset($this->Message['context']['composition'])) && isset($this->Message['context']['instance']) )  //component instance.
           {
@@ -236,12 +192,12 @@ class Service
               default:
               $this->Activity=array('decoding'=>'json','encoding'=>'json', 'incoming'=>$_REQUEST);
               
-              global $RuntimePath; if(isset($RuntimePath))
-              $fh = fopen($RuntimePath.'service/servicelog.dat', 'a') or die("can't open file");
-              $stringData = "<<< \r\n\r\n >>>" . print_r($_REQUEST, true) . "<<< \r\n\r\n >>>";
-              fwrite($fh, $stringData);
-              fclose($fh);
-
+              if(isset($RuntimePath))
+              {
+                $fh = fopen($RuntimePath.'/service/transaction/transaction.log', 'a') or die('No access to transaction log');
+                fwrite($fh, '<<< transaction directive="'.$this->Directive.'">>>' .PHP_EOL. json_encode($this->Message) . PHP_EOL.'<<< /transaction >>>'.PHP_EOL);
+                fclose($fh);
+              }
               break;
           }
     }
@@ -267,7 +223,7 @@ class Service
 
         if($DetectJSON && $DetectXML)   //Favor JSON
         {
-            $result['json']['response']['xml']=$result['xml']->asXML;
+            $result['json']['response']['xml']=$result['xml']->asXML();
         }
         elseif($DetectXML && !$DetectJSON)
         {
@@ -390,8 +346,6 @@ class ComponentEditor extends Service
         $WorkingSet=array();
         $Which = $activity['context']['instance'];
         $response = array();
-
-
         /*
         {
          "request":
@@ -408,7 +362,6 @@ class ComponentEditor extends Service
             }
           }
          }
-
         */
         if( isset($req['SERVE']) )             //Servable Action  "SERVE"
         {

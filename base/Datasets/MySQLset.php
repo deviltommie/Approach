@@ -28,15 +28,19 @@ IF YOU NEED PRODUCTION USAGE, USE MSSQL OR THOUROUGHLY TEST MYSQLI VERSION FOR N
 MONGODB, REDIS and XML FILE CONNECTORS ON THE WAY - DESIGNING CONNECTOR ARCHITECTURE CURRENTLY
 
 Request For Comments:
-1. 	How can we make the search functionality stronger, easier to batch, more intuitive and/or more generic?
+1. 	The Generator needs to understand connectors somehow, very cleanly.
+2. 	Before or after moving data into the profile property, the concept of PrimaryKey/Foreign Keys
+	needs to be made generic
+3. 	How can we make the search functionality stronger, easier to batch, more intuitive and/or more generic?
  
 */
+
+//global $RuntimePath;
+global $db;
 
 //require_once('/../__config_error.php');
 //require_once('/../__config_database.php');
 
-global $db;
-global $RuntimePath;
 if(!isset($db)) die('No database selected');
 if(!isset($RuntimePath)) $RuntimePath=$_SERVER['DOCUMENT_ROOT'] .'/';	//Included from core.php?
 
@@ -50,51 +54,49 @@ function fileSave($file, $data)
     fclose($handle);
 }
 
-function SavePHP($dbo,$classpath='')
+function SavePHP($dbo)
+{
+    global $RuntimePath;
+      /*
+       *	To Do: Move Variables into a public static Dataset::profile map
+       */
+    $theOutput = "<?php \nclass " . $dbo->table . " extends Dataset { \n";
+    $theOutput .= "\n\tpublic \$p=" . var_export($dbo->Columns, true);
+    
+    $theOutput .= ";\n\tpublic \$table='$dbo->table';";
+    
+    if( isset($dbo->PrimaryKey) ) $theOutput .= "\n\tpublic \$PrimaryKey='$dbo->PrimaryKey';";
+    else $theOutput .= "\n\tpublic \$PrimaryKey='+++PARENT+++';";
+    
+    if( isset($dbo->ForeignKey) ) $theOutput .= "\n\tpublic \$ForeignKey='".var_export($dbo->ForeignKey,true).'\';';
+    
+    $theOutput .= "\n\tpublic \$data;";
+    $theOutput .= "\n}\n?>";
+    
+    fileSave($RuntimePath . 'support/datasets/tmp_' . $dbo->table . '.php', $theOutput);
+}
+
+function RevisingSavePHP($dbo)
 {
   global $RuntimePath;
     /*
      *	To Do: Move Variables into a public static Dataset::profile map
      */
-  $RefersExist=isset($dbo->ForeignKey);
-
+    
   $LinePrefix="\n\t";
-  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset'.PHP_EOL.'{';
+  $theOutput = '<?php '.PHP_EOL.'require_once(__DIR__.\'/../../core.php\');'.PHP_EOL.'class '.$dbo->table . ' extends Dataset { '.PHP_EOL;
+  $theOutput .= $LinePrefix.'public static $profile[\'header\']=' . var_export($dbo->Columns, true).';';
 
-  //TO DO: In C++ this would be public static const, but in PHP we will need to make it protected
-  //First will need to make read-only accessor/get function in Dataset and ensure other classes are using it
-  
-  $theOutput .= $LinePrefix.'public static $profile= array(' ;
-  $theOutput .= $LinePrefix."\t'target' =>'".$dbo->table.'\',';
-  if( isset($dbo->PrimaryKey))
-  {
-	$theOutput .= $LinePrefix."\t'Accessor'=>array( ".($RefersExist?$LinePrefix."\t\t'":'').'\'Primary\' => \''.$dbo->PrimaryKey.'\'';
-	if($RefersExist)
-		$theOutput .= ','.$LinePrefix."\t\t'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\')';
-	$theOutput .= '),';
-  }
-  elseif($RefersExist)
-	$theOutput .= $LinePrefix."\t'Accessor'=>array( 'Reference'=>array( '".implode(', ',$dbo->ForeignKey).'\'),';
+  $theOutput .= $LinePrefix.'public static $profile[\'target\']=\''.$dbo->table.'\';';
 
-  $theOutput .= $LinePrefix."\t'header'=>array( ";
-  foreach($dbo->Columns as $col => $aspect)
-  {
-	$theOutput.=$LinePrefix."\t\t'".$col.'\' => array( ';
-	foreach($aspect as $k => $v)
-	{
-		$theOutput.=' \''.$k.'\' => \''.str_replace('\'','\\\'',$v).'\',';
-	}
-	rtrim($theOutput,',');
-	$theOutput.='),';
-  }
-  rtrim($theOutput,',');
-  $theOutput.=$LinePrefix."\t".')'.$LinePrefix.');';
+  if( count($dbo->ForeignKey) > 0 ) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'ForeignKey\']='.var_export($dbo->ForeignKey,true).';';
+  if( isset($dbo->PrimaryKey)) $theOutput .= $LinePrefix.'public static $profile[\'Accessor\'][\'Primary\']=\'<Accessor="Inherited" />\';';
 
   $theOutput .= $LinePrefix.'public $data;';
   $theOutput .= PHP_EOL.'}'.PHP_EOL.'?>';
 
 //  print_r($theOutput);	$RuntimePath . 'support/datasets/' 
-  fileSave($RuntimePath . 'support/datasets/' .$classpath.'/'. $dbo->table . '.php', $theOutput);
+  fileSave($RuntimePath . 'support/datasets/' . $dbo->table . '.php', $theOutput);
 }
 
 
@@ -129,25 +131,25 @@ function LoadDirect($query)
 
 function UpdateSchema()
 {
-  //need switch() case: for database type [MySQL, MSSQL, Mongo, Redis, Parsyph, Hadoop, Cassandra]
-  $InfoSchemaDatabaseColumn='TABLE_SCHEMA';
-	
   $sql='SELECT TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, COLUMN_DEFAULT, IS_NULLABLE, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS';
 
   $spread=array();
   $DataObjects=array();
   $schemainfo=LoadDirect($sql);
 
+  //Sort 'spread' into spread[Table][Column] , for nested try do spread[Collection][property.subdocument.subproperty]
   foreach($schemainfo as $SchemaRow)
   {
-    $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;  
+    $spread[$SchemaRow->data['TABLE_NAME']][$SchemaRow->data['COLUMN_NAME']]=$SchemaRow->data;
   }  
   
   foreach($spread as $table => $columns)
   {
+    //Get all primary and foreign key usage for all tables
     $sql="SELECT * FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_NAME = N'$table';";
     $findKeys=LoadDirect($sql);
-
+    
+    //Get all view usage for all tables
     $sql="SELECT * FROM INFORMATION_SCHEMA.VIEW_COLUMN_USAGE WHERE VIEW_NAME = N'$table';";
     $keyProperties=LoadDirect($sql);
 
@@ -155,13 +157,15 @@ function UpdateSchema()
 
     foreach($findKeys as $row)
     {
+        //does this work for MySQL, MSSQL and PostgreSQL? what do we need to change
+        //What should we do for mongo?
         $str = explode('_',$row->data['CONSTRAINT_NAME']);
-        if($str[0] == "PK")
+        if($str[0] == 'PK')
             $dObj->PrimaryKey = $row->data['CONSTRAINT_NAME'];
         else
             $dObj->ForeignKey[]=$row->data['CONSTRAINT_NAME'];
     }
-    $dObj->PrimaryKey='id';
+    if(!isset($dObj->PrimaryKey)) $dObj->PrimaryKey='id';
 
     $t=array();
     foreach($keyProperties as $View)
@@ -177,18 +181,11 @@ function UpdateSchema()
     $dObj->Columns = $spread[$table];
     $dObj->table = $table;
 
-	$classpath='';
-	foreach($spread[$table] as $column )
-	{
-		$classpath=(strtolower($column[$InfoSchemaDatabaseColumn])=='information_schema') ? 'schema':'';
-		break;
-	}
-
-    SavePHP($dObj,  $classpath);
+    SavePHP($dObj);
   }
 }
 
-UpdateSchema();
+//UpdateSchema();
 
 class Dataset
 {
